@@ -412,11 +412,19 @@ p{margin:0;text-wrap:pretty}
 .chip-float small{display:block;font-weight:400;color:var(--muted);font-size:.75rem}
 @media (max-width:880px){ .split,.split.rev{grid-template-columns:1fr} .split.rev > .media{order:0} .chip-float{left:10px;bottom:-18px} }
 .walk{background:var(--bg-2)}
-.walk-media{position:relative;padding:0 10% 20% 0}
-.walk-media .a{border-radius:var(--r-lg);overflow:hidden;background:#f3efe8;box-shadow:var(--sh-2)}
-.walk-media .a img{width:100%;height:auto}
-.walk-media .b{position:absolute;right:0;bottom:0;width:38%;border-radius:22px;overflow:hidden;box-shadow:var(--sh-3);border:5px solid #fff;background:#fff}
-.walk-media .b img{width:100%;height:auto}
+.walk-tour{min-width:0}
+.tour-stage{position:relative;aspect-ratio:4/3;min-height:320px;overflow:hidden;border-radius:var(--r-lg);background:var(--ink);box-shadow:var(--sh-2)}
+.tour-poster,.tour-frame{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tour-poster{display:grid;place-items:center}
+.tour-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tour-poster:after{content:"";position:absolute;inset:0;background:rgba(16,32,26,.25);pointer-events:none}
+.tour-poster a{z-index:1}
+.tour-caption{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:.88rem}
+.tour-caption button{color:var(--green);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}
+.tour-uses{display:grid;gap:10px;color:var(--muted);font-size:.94rem}
+.tour-uses b{color:var(--ink)}
+.tour-actions{display:flex;flex-wrap:wrap;gap:10px}
+.business-features .bx{padding-bottom:22px;min-height:175px}
 .steps{display:grid;width:100%;counter-reset:n}
 .steps li{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--line);counter-increment:n}
 .steps li:last-child{border-bottom:1px solid var(--line)}
@@ -432,49 +440,9 @@ p{margin:0;text-wrap:pretty}
 .bx .tx p{color:var(--muted);font-size:.93rem;line-height:1.55;max-width:42ch}
 .bx .ic{width:38px;height:38px;border-radius:11px;background:var(--sage);color:var(--green);display:grid;place-items:center;margin-bottom:8px}
 .bx .ic svg{width:18px;height:18px}
-.bx .vis{flex:1;position:relative;min-height:120px}
-.b-stage{grid-column:span 3;grid-row:span 2}
-.b-stage .vis{margin:22px 14px 14px;border-radius:16px;overflow:hidden}
-.b-stage .vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
-.b-stage:hover .vis img{transform:scale(1.03)}
-.b-words{grid-column:span 3}
-.b-words .vis{display:flex;align-items:flex-end;padding:22px 26px 26px;min-height:0}
-.prompt{width:100%;padding:8px 8px 8px 16px;border-radius:14px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;gap:10px;min-height:56px}
-.prompt .caret{flex:1;font-size:.95rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prompt .caret::after{content:"";display:inline-block;width:1.5px;height:1.05em;background:var(--green);margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.prompt .go{width:38px;height:38px;border-radius:10px;background:var(--green);color:#fff;display:grid;place-items:center;flex:none}
-.prompt .go svg{width:16px;height:16px}
-.b-ext{grid-column:span 3;flex-direction:row}
-.b-ext .tx{flex:1;padding-bottom:26px;align-content:start}
-.b-ext .vis{flex:1;margin:14px 14px 14px 0;border-radius:16px;overflow:hidden}
-.b-ext .vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .b-third{grid-column:span 2}
-.b-plan .vis{margin:22px 26px 26px;border-radius:14px;overflow:hidden;background:#f3efe8}
-.b-plan .vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.shoprow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:auto 26px 26px;padding-top:22px}
-.shoprow div{border-radius:12px;background:var(--bg);border:1px solid var(--line);padding:8px;display:grid;gap:4px}
-.shoprow .im{aspect-ratio:1;border-radius:8px;background:var(--bg-2);display:grid;place-items:center;margin-bottom:4px}
-.shoprow .im img{width:82%;height:82%;object-fit:contain}
-.shoprow small{font-size:.72rem;color:var(--muted);line-height:1.2}
-.shoprow b{font-size:.8rem;font-weight:600}
-.walls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:auto 26px 26px;padding-top:22px}
-.walls div{display:grid;gap:6px}
-.walls i{aspect-ratio:3/4;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);transition:transform .3s var(--ease)}
-.walls div:hover i{transform:translateY(-3px)}
-.walls small{font-size:.72rem;color:var(--muted);text-align:center}
-.b-half{grid-column:span 3;min-height:230px}
-.b-half .foot{margin-top:auto;padding:22px 26px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative;z-index:2}
-.b-dark{background:var(--green);border-color:var(--green);color:#fff}
-.b-dark .tx p{color:rgba(255,255,255,.72)}
-.b-dark .link{color:var(--gold-2)}
-.b-dark .deco{position:absolute;right:-10px;bottom:-20px;width:230px;z-index:1;pointer-events:none;filter:drop-shadow(0 20px 30px rgba(0,0,0,.35));transition:transform .6s var(--ease)}
-.b-dark:hover .deco{transform:translate(-6px,-6px) rotate(-2deg)}
-.avatars{display:flex}
-.avatars span{width:34px;height:34px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font-size:.72rem;font-weight:600;color:#fff;margin-left:-8px}
-.avatars span:first-child{margin-left:0}
-@media (max-width:1020px){ .b-stage,.b-words,.b-ext,.b-half{grid-column:span 6} .b-third{grid-column:span 3} .b-stage{grid-row:auto} .b-stage .vis{min-height:320px} }
-@media (max-width:640px){ .b-third{grid-column:span 6} .b-ext{flex-direction:column} .b-ext .vis{margin:0 14px 14px;min-height:220px} .b-plan .vis{min-height:180px} .b-dark .deco{width:150px} }
+@media(max-width:1020px){.b-third{grid-column:span 3}}
+@media(max-width:640px){.b-third{grid-column:span 6}}
 
 /* ───────────── roi ───────────── */
 .roi{display:grid;grid-template-columns:1.05fr .95fr;border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh-2)}
@@ -767,7 +735,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       <span class="ind" aria-hidden="true"></span>
       <a href="#solutions">Solutions</a>
       <a href="#catalogue">Catalogue Studio</a>
-      <a href="#walkthrough">3D</a>
+      <a href="#walkthrough">3D tours</a>
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
     </nav>
@@ -797,7 +765,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   <div class="wrap">
     <div class="hero-copy">
       <a class="announce rv" href="#catalogue">Catalogue Studio<span class="hide-s">&nbsp;for furniture brands</span><svg><use href="#i-arrow"/></svg></a>
-      <h1 class="rv d1">Help buyers picture <em class="accent">what’s possible.</em></h1>
+      <h1 class="rv d1">Stage listings. <em class="accent">Share spaces in 3D.</em></h1>
       <p class="lede rv d2">Stage listing photos, turn floor plans into shareable 3D tours, and show your furniture in styled rooms. Built for property and furniture teams.</p>
       <div class="hero-ctas rv d3">
         <a class="btn btn-primary btn-lg" href="#pricing">See Team pricing <svg class="arr"><use href="#i-arrow"/></svg></a>
@@ -1034,20 +1002,26 @@ a.chip-float{text-decoration:none;color:var(--ink)}
 <!-- ═════════ WALKTHROUGH ═════════ -->
 <section class="sec walk" id="walkthrough">
   <div class="wrap split rev">
-    <div class="media walk-media rv">
-      <div class="a"><img src="img/plan-to-3d.webp" alt="A floor plan turning into a furnished 3D room" loading="lazy" width="840" height="486"></div>
-      <div class="b"><img src="img/walkthrough.webp" alt="Livinai 3D walkthrough on a phone" loading="lazy" width="900" height="1124"></div>
-    </div>
+    <figure class="walk-tour rv" style="margin:0">
+      <div class="tour-stage">
+        <div class="tour-poster" id="tourPoster">
+          <img src="img/tour-apartment.webp" alt="Furnished living room in the sample apartment" loading="lazy" width="1040" height="780">
+          <a class="btn btn-light" href="/3d/?demo=apartment" id="tourStart"><svg aria-hidden="true"><use href="#i-play"/></svg>Explore the sample apartment</a>
+        </div>
+        <iframe class="tour-frame" id="sampleTour" title="Interactive 3D tour of the Livinai sample apartment" allow="fullscreen" allowfullscreen hidden></iframe>
+      </div>
+      <figcaption class="tour-caption"><span>Walk through four rooms or switch to a view from above.</span><a href="/3d/?demo=apartment" target="_blank" rel="noopener">Open full tour</a><button type="button" id="tourClose" hidden>Close preview</button></figcaption>
+    </figure>
     <div class="copy rv d1">
       <span class="eyebrow">Floor plan to 3D</span>
-      <h2>Walk buyers through homes <em class="accent">not yet built.</em></h2>
-      <p class="lede">Build and furnish a 3D walkthrough in the Livinai app, then share it as a link that opens in a browser.</p>
-      <ol class="clean steps">
-        <li><span><b>Add a floor plan</b><span>Use a clear floor plan photo or draw your rooms to scale.</span></span></li>
-        <li><span><b>Choose a style</b><span>Give each room its type and style, and pick the kitchen layout.</span></span></li>
-        <li><span><b>Share a 3D tour</b><span>One link for off-plan sales, listings and client meetings. Embed it on your website too.</span></span></li>
-      </ol>
-      <a class="btn btn-secondary" href="tours/">Manage 3D tours</a>
+      <h2>Give clients a <em class="accent">space to explore.</em></h2>
+      <p class="lede">Draw a floor plan or start from an image in the Livinai app. Set the room types, review the furnished walkthrough, then publish it from 3D tours with Pro or Team. Clients open the link in their browser.</p>
+      <ul class="clean tour-uses">
+        <li><b>Property developers</b> can embed a tour on an off-plan listing so buyers can explore the layout before a viewing.</li>
+        <li><b>Real estate agents</b> can share the link in a listing or email to help remote buyers understand how the rooms connect.</li>
+        <li><b>Design studios</b> can review furniture placement and circulation with clients before approving a layout.</li>
+      </ul>
+      <div class="tour-actions"><a class="btn btn-secondary" href="tours/">Manage my tours</a></div>
     </div>
   </div>
 </section>
@@ -1059,51 +1033,24 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       <div class="t rv"><span class="eyebrow">Tools</span><h2>From listing photos <em class="accent">to product lookbooks.</em></h2></div>
       <p class="lede rv d1">Design and stage spaces in the app. Create product scenes and manage shared work on the web.</p>
     </div>
-    <div class="bento">
-      <article class="bx b-stage rv">
-        <div class="tx"><span class="ic"><svg><use href="#i-sofa"/></svg></span><h3>Virtual staging</h3><p>Furnish empty rooms in any of 14 styles, from a single phone photo.</p></div>
-        <div class="vis"><img src="img/scene-kitchen.webp" alt="Styled kitchen made with Livinai" loading="lazy"></div>
-      </article>
-      <article class="bx b-words rv d1">
-        <div class="tx"><span class="ic"><svg><use href="#i-chat"/></svg></span><h3>Edit with words</h3><p>Type what you want changed. Livinai does the rest.</p></div>
-        <div class="vis"><div class="prompt"><span class="caret" id="typer"></span><span class="go"><svg><use href="#i-arrow"/></svg></span></div></div>
-      </article>
-      <article class="bx b-ext rv d2">
-        <div class="tx"><span class="ic"><svg><use href="#i-tree"/></svg></span><h3>Exteriors and gardens</h3><p>Curb appeal, terraces and gardens, not only interiors.</p></div>
-        <div class="vis"><img src="img/scene-villa.webp" alt="Styled villa exterior" loading="lazy"></div>
-      </article>
-      <article class="bx b-third b-plan rv">
-        <div class="tx"><span class="ic"><svg><use href="#i-cube"/></svg></span><h3>3D walkthroughs</h3><p>Floor plan to a furnished home, shared as a link anyone can open.</p></div>
-        <div class="vis"><img src="img/plan-to-3d.webp" alt="" loading="lazy"></div>
+    <div class="bento business-features">
+      <article class="bx b-third rv">
+        <div class="tx"><span class="ic"><svg><use href="#i-sofa"/></svg></span><h3>Prepare listings</h3><p>Virtually furnish empty interiors, restyle occupied rooms, and preview exterior or garden updates from existing listing photos in the app.</p></div>
       </article>
       <article class="bx b-third rv d1">
-        <div class="tx"><span class="ic"><svg><use href="#i-bag"/></svg></span><h3>Shop this look</h3><p>Real products that match each design, in local stores.</p></div>
-        <div class="shoprow">
-          <div><span class="im"><img src="img/p-pendant.png" alt=""></span><small>Linen pendant</small><b>$260</b></div>
-          <div><span class="im"><img src="img/p-sideboard.png" alt=""></span><small>Oak sideboard</small><b>$1,380</b></div>
-          <div><span class="im"><img src="img/p-pouf.png" alt=""></span><small>Knit pouf</small><b>$190</b></div>
-        </div>
+        <div class="tx"><span class="ic"><svg><use href="#i-palette"/></svg></span><h3>Present renovation options</h3><p>Show wall colours, flooring, and material choices on the client's own photo. Use a written edit to revise a specific part of the image.</p></div>
       </article>
       <article class="bx b-third rv d2">
-        <div class="tx"><span class="ic"><svg><use href="#i-palette"/></svg></span><h3>Restyle and renovate</h3><p>Change walls, floors and colours on a real room.</p></div>
-        <div class="walls">
-          <div><i style="background:#e9e3d7"></i><small>Linen</small></div>
-          <div><i style="background:#b9c2ad"></i><small>Sage</small></div>
-          <div><i style="background:#c99f7f"></i><small>Clay</small></div>
-          <div><i style="background:#4c5a52"></i><small>Forest</small></div>
-        </div>
+        <div class="tx"><span class="ic"><svg><use href="#i-cube"/></svg></span><h3>Publish property tours</h3><p>Turn a floor plan into a furnished walkthrough. Share a browser link, copy the embed for a listing, or turn sharing off from your account.</p><a class="link" href="#walkthrough">Try a 3D tour</a></div>
       </article>
-      <article class="bx b-half b-dark grain rv">
-        <div class="tx"><span class="tag d">Live</span><h3 style="color:#fff">Catalogue Studio</h3><p>Turn product photos into styled scenes, shoppable catalogues and PDF lookbooks.</p></div>
-        <div class="foot"><a class="link" href="#catalogue"><span>Try the live demo</span><svg><use href="#i-arrow"/></svg></a></div>
-        <img class="deco" src="img/p-sectional.png" alt="">
+      <article class="bx b-third rv">
+        <div class="tx"><span class="ic"><svg><use href="#i-camera"/></svg></span><h3>Create retail visuals</h3><p>Bulk-upload product photos, make styled room scenes, and publish a catalogue or a printable lookbook that links back to your store.</p><a class="link" href="#catalogue">Open Catalogue Studio</a></div>
       </article>
-      <article class="bx b-half rv d1">
-        <div class="tx"><h3>Team workspace</h3><p>Share a product library and image balance. Manage branding, usage and billing from one account.</p></div>
-        <div class="foot">
-          <div class="avatars" aria-hidden="true"><span style="background:#164a37">AK</span><span style="background:#b4874a">SM</span><span style="background:#2f7659">JL</span><span style="background:#646d67">+5</span></div>
-          <a class="link" href="account/?plan=team"><span>Start a team</span><svg><use href="#i-arrow"/></svg></a>
-        </div>
+      <article class="bx b-third rv d1">
+        <div class="tx"><span class="ic"><svg><use href="#i-bag"/></svg></span><h3>Help buyers visualise furniture</h3><p>Add a room-preview button to your product pages. Shoppers can upload their own room photo and see a preview featuring the selected piece.</p><a class="link" href="#tryon">Try a room preview</a></div>
+      </article>
+      <article class="bx b-third rv d2">
+        <div class="tx"><span class="ic"><svg><use href="#i-layers"/></svg></span><h3>Share work across the team</h3><p>Invite colleagues, share a product library and image credits, and manage usage, branding and billing from one workspace.</p><a class="link" href="account/">Open Team account</a></div>
       </article>
     </div>
   </div>
@@ -1954,20 +1901,25 @@ a.chip-float{text-decoration:none;color:var(--ink)}
 
   renderLib(); fillDetail(); renderPick(); go(2); renderAcct(); refresh();
 
-  /* edit-with-words typer */
-  const typer = $('#typer');
-  const PROMPTS = ['Remove the armchair, add a floor lamp', 'Paint the walls warm sage green', 'Swap the floor for light oak', 'Make it Japandi, keep the window', 'Add plants and a jute rug'];
-  if (reduce) typer.textContent = PROMPTS[0];
-  else {
-    let pi = 0, ci = 0, del = false;
-    const tick = () => {
-      const t = PROMPTS[pi];
-      if (!del) { ci++; typer.textContent = t.slice(0, ci); if (ci >= t.length) { del = true; return setTimeout(tick, 1800); } }
-      else { ci -= 2; typer.textContent = t.slice(0, Math.max(0, ci)); if (ci <= 0) { del = false; ci = 0; pi = (pi + 1) % PROMPTS.length; return setTimeout(tick, 350); } }
-      setTimeout(tick, del ? 18 : 42 + Math.random() * 40);
-    };
-    new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { o.disconnect(); tick(); } }).observe(typer);
-  }
+  const tourStart = $('#tourStart'), tourPoster = $('#tourPoster'), tourFrame = $('#sampleTour'), tourClose = $('#tourClose');
+  tourStart.addEventListener('click', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const url = new URL(tourStart.href);
+    url.searchParams.set('embed', '1');
+    tourFrame.src = url.href;
+    tourFrame.hidden = false;
+    tourPoster.hidden = true;
+    tourClose.hidden = false;
+    tourFrame.focus();
+  });
+  tourClose.addEventListener('click', () => {
+    tourFrame.removeAttribute('src');
+    tourFrame.hidden = true;
+    tourPoster.hidden = false;
+    tourClose.hidden = true;
+    tourStart.focus();
+  });
 
   /* Pricing and savings */
   const rP = $('#rPhotos'), rC = $('#rCost');

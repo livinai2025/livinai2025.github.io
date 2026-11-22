@@ -171,6 +171,7 @@ select.mini{padding:0 8px}
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const view = $('#view');
   const qs = new URLSearchParams(location.search);
+  const paymentLinkId = qs.get('_ptxn');
   let inviteToken = qs.get('invite') || '';
   const S = { data: null, tab: qs.get('tab') || 'overview', cycle: qs.get('cycle') === 'month' ? 'month' : 'year', seats: Biz.TEAM_PLAN.seatsIncluded, name: '' };
 
@@ -277,6 +278,7 @@ select.mini{padding:0 8px}
 
   /* ───── Paddle checkout ───── */
   let paddleReady = null;
+  const checkoutSettings = { displayMode: 'overlay', theme: 'light', locale: 'en', allowLogout: false };
   function loadPaddle(cfg) {
     paddleReady ??= new Promise((resolve, reject) => {
       const s = document.createElement('script');
@@ -284,7 +286,7 @@ select.mini{padding:0 8px}
       s.onload = () => {
         try {
           if (cfg.environment !== 'production') window.Paddle.Environment.set('sandbox');
-          window.Paddle.Initialize({ token: cfg.clientToken, eventCallback: onPaddleEvent });
+          window.Paddle.Initialize({ token: cfg.clientToken, checkout: { settings: checkoutSettings }, eventCallback: onPaddleEvent });
           resolve();
         } catch (e) { reject(e); }
       };
@@ -294,30 +296,45 @@ select.mini{padding:0 8px}
     return paddleReady.catch(error => { paddleReady = null; throw error; });
   }
 
-  let checkoutPending = false;
+  let checkoutPending = false, checkoutFromLink = false, waitingForActivation = false;
   async function onPaddleEvent(e) {
-    if (e?.name === 'checkout.closed') {
+    if (e?.name === 'checkout.closed' || e?.name === 'checkout.error') {
+      const wasPending = checkoutPending;
       checkoutPending = false;
-      if (S.data && !S.data.team?.live) render();
+      if (wasPending && !waitingForActivation && !checkoutFromLink && S.data && !S.data.team?.live) render();
+      if (e.name === 'checkout.error') say('Paddle could not open checkout. Try again or contact support.');
       return;
     }
-    if (e?.name !== 'checkout.completed' || !checkoutPending) return;
+    if (e?.name !== 'checkout.completed' || !checkoutPending || waitingForActivation) return;
     checkoutPending = false;
+    if (checkoutFromLink) {
+      qs.delete('_ptxn');
+      history.replaceState(null, '', location.pathname + (qs.size ? '?' + qs.toString() : ''));
+      window.Paddle?.Checkout?.close?.();
+      say(S.data ? 'Paddle confirmed the update.' : 'Paddle confirmed the update. Sign in to see your team.');
+      load();
+      return;
+    }
+    waitingForActivation = true;
     const tx = e.data?.transaction_id;
     view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Checkout complete</h2><p class="muted">We’re waiting for Paddle to confirm your plan.</p></div></section>';
     for (let i = 0; i < 20; i += 1) {
       try {
         const d = await team('/sync', { method: 'POST', body: { transactionId: tx } });
-        if (d.team?.live) { S.data = d; S.tab = 'members'; window.Paddle?.Checkout?.close?.(); render(); say('Your Team plan is active. Invite your colleagues.'); return; }
+        if (d.team?.live) {
+          S.data = d; S.tab = 'members'; window.Paddle?.Checkout?.close?.(); waitingForActivation = false;
+          render(); say('Your Team plan is active. Invite your colleagues.'); return;
+        }
       } catch { /* keep waiting for the webhook */ }
       await new Promise((r) => setTimeout(r, 2500));
     }
-    say('Your checkout is complete. Refresh this page to check activation.');
+    waitingForActivation = false;
+    say('Checkout is complete. Refresh this page to check activation.');
     load();
   }
 
   async function startCheckout() {
-    if (checkoutPending) return;
+    if (checkoutPending || waitingForActivation) return;
     const btn = $('#payBtn'); btn.disabled = true;
     try {
       if (!S.data.team) {
@@ -327,14 +344,31 @@ select.mini{padding:0 8px}
       }
       const c = await team('/checkout', { method: 'POST', body: { cycle: S.cycle, seats: S.seats } });
       await loadPaddle(c);
+      checkoutFromLink = false;
       checkoutPending = true;
       window.Paddle.Checkout.open({
         transactionId: c.transactionId,
         customer: { email: c.customer.email },
-        settings: { displayMode: 'overlay', theme: 'light', locale: 'en', allowLogout: false },
+        settings: checkoutSettings,
       });
     } catch (e) { checkoutPending = false; say(e.message); }
     finally { if (btn.isConnected && !checkoutPending) btn.disabled = false; }
+  }
+
+  async function openPaymentLink() {
+    if (!paymentLinkId) return;
+    if (!/^txn_[a-z0-9]{26}$/i.test(paymentLinkId)) return say('This Paddle payment link is incomplete.');
+    try {
+      const { billing } = await Biz.call('/config', { auth: false });
+      if (!checkoutAvailable({ billing })) return say('Online billing is currently unavailable.');
+      checkoutFromLink = true;
+      checkoutPending = true;
+      // Paddle.js opens the transaction in the _ptxn query parameter on initialization.
+      await loadPaddle(billing);
+    } catch (error) {
+      checkoutPending = false;
+      say(error.message);
+    }
   }
 
   /* ───── team ───── */
@@ -605,6 +639,7 @@ select.mini{padding:0 8px}
     }
   }
   load();
+  openPaymentLink();
 })();
 </script>
 </body>

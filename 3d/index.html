@@ -16,6 +16,7 @@
 <style>
 :root{--accent:#164a37;--ink:#111a15;--muted:#646d67;--glass:rgba(255,255,255,.9);--line:rgba(17,26,21,.1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,serif}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;height:100%;overflow:hidden;background:#c9d5d8;color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 button,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -41,6 +42,12 @@ button,select{font:inherit;color:inherit}
 .zoom{display:none;gap:6px}
 .plan .zoom{display:flex}
 .plan .rooms{display:none}
+.move-pad{position:fixed;z-index:5;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 60px);left:max(12px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(3,38px);gap:4px}
+.move-pad button{height:38px;border:0;border-radius:10px;background:var(--glass);color:var(--ink);font-weight:600;cursor:pointer;touch-action:none}
+.move-pad button:active{background:var(--accent);color:#fff}
+.move-pad button:first-child{grid-column:2}
+.move-pad button:nth-child(2){grid-column:1}
+.plan .move-pad{display:none}
 .hint{position:fixed;left:50%;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 74px);transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(17,26,21,.72);color:#fff;font-size:.84rem;z-index:4;white-space:nowrap;transition:opacity .5s;pointer-events:none}
 .hint.off{opacity:0}
 .made{position:fixed;right:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:4;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:var(--glass);font-size:.76rem;color:var(--muted);text-decoration:none}
@@ -90,6 +97,12 @@ button,select{font:inherit;color:inherit}
   <button class="ibtn" type="button" id="night" aria-pressed="false" aria-label="Evening light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg></button>
 </div>
 
+<div class="move-pad" id="movePad" role="group" aria-label="Move around the room" hidden>
+  <button type="button" data-move="up" aria-label="Walk forward">↑</button>
+  <button type="button" data-move="left" aria-label="Step left">←</button>
+  <button type="button" data-move="down" aria-label="Walk backward">↓</button>
+  <button type="button" data-move="right" aria-label="Step right">→</button>
+</div>
 <div class="hint" id="hint" hidden>Drag to look around · Arrow keys or W A S D to walk</div>
 <a class="made" id="made" href="https://livinai.app/" target="_blank" rel="noopener" hidden><img src="/assets/img/wordmark.png" alt="">Made with Livinai</a>
 
@@ -101,20 +114,32 @@ button,select{font:inherit;color:inherit}
   const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const API = (local && qs.get('api')) || 'https://ai-interior-design-g5oc.onrender.com';
   const token = qs.get('h') || '';
+  const demo = qs.get('demo') === 'apartment';
+  const embedded = qs.get('embed') === '1';
   const MARK = '/*__LIVINAI_PAYLOAD__*/null';
   const $ = (s) => document.querySelector(s);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const frame = $('#view');
-  let tour = null, mode = 'walk';
+  let tour = null, mode = 'walk', loadingNotice, loadDeadline, modelPage;
 
   function fail(title, text) {
-    $('#coverBox').innerHTML = `<h1>${esc(title)}</h1><p>${esc(text)}</p><p><a href="https://livinai.app/">Livinai</a></p>`;
+    finishLoading();
+    frame.hidden = true;
+    frame.removeAttribute('src');
+    ['#bar', '#dock', '#hint', '#movePad'].forEach(selector => { $(selector).hidden = true; });
+    $('#coverBox').innerHTML = `<h1>${esc(title)}</h1><p>${esc(text)}</p><p><a href="${esc(location.href)}">Reload tour</a></p>`;
     $('#cover').classList.remove('off');
   }
-  const status = (text) => { $('#coverText').textContent = text; };
+  function finishLoading() {
+    clearTimeout(loadingNotice);
+    clearTimeout(loadDeadline);
+    if (modelPage) URL.revokeObjectURL(modelPage);
+    modelPage = null;
+  }
+  const status = (text) => { const label = $('#coverText'); if (label) label.textContent = text; };
 
   async function getJson(url) {
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(25000) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(data.message || 'This 3D tour could not be opened.'), { status: res.status });
     return data;
@@ -127,7 +152,7 @@ button,select{font:inherit;color:inherit}
     const area = tour.areaMeters ? `${Math.round(tour.areaMeters)} m² · ` : '';
     $('#brand').innerHTML = `${logo}<span><b>${esc(tour.title)}</b><small>${area}${tour.roomNames.length} room${tour.roomNames.length === 1 ? '' : 's'} · 3D tour</small></span>`;
     document.title = `${tour.title} · 3D tour${b?.name ? ' · ' + b.name : ''}`;
-    $('#made').hidden = Boolean(b?.hideLivinai);
+    $('#made').hidden = embedded || Boolean(b?.hideLivinai);
     $('#room').innerHTML = tour.roomNames.map((n, i) => `<option value="${i}">${esc(n)}</option>`).join('');
   }
 
@@ -163,6 +188,26 @@ button,select{font:inherit;color:inherit}
       else document.documentElement.requestFullscreen?.().catch(() => {});
     });
     if (!document.documentElement.requestFullscreen) $('#fs').hidden = true;
+
+    const vectors = { up: [0, .85], down: [0, -.85], left: [-.85, 0], right: [.85, 0] };
+    const stop = () => run(s => s.setJoystick(0, 0));
+    document.querySelectorAll('[data-move]').forEach(button => {
+      const move = () => run(s => s.setJoystick(...vectors[button.dataset.move]));
+      button.addEventListener('pointerdown', event => {
+        if (event.button !== 0) return;
+        button.setPointerCapture(event.pointerId);
+        move();
+      });
+      button.addEventListener('lostpointercapture', stop);
+      button.addEventListener('pointerup', stop);
+      button.addEventListener('pointercancel', stop);
+      button.addEventListener('click', event => {
+        if (event.detail !== 0) return;
+        move();
+        setTimeout(stop, 180);
+      });
+    });
+    window.addEventListener('blur', stop);
   }
 
   /** Keyboard walking: arrows or W A S D drive the 3D page's joystick. */
@@ -180,14 +225,16 @@ button,select{font:inherit;color:inherit}
   }
 
   addEventListener('message', (e) => {
-    if (e.source !== frame.contentWindow || !e.data?.livinai3d) return;
+    if (e.origin !== location.origin || e.source !== frame.contentWindow || !e.data?.livinai3d) return;
     let msg; try { msg = JSON.parse(e.data.livinai3d); } catch { return; }
     if (msg.type === 'ready') {
+      if (!$('#coverText')) return;
+      finishLoading();
       $('#cover').classList.add('off');
-      ['#bar', '#dock', '#hint'].forEach((s) => { $(s).hidden = false; });
+      ['#bar', '#dock', '#hint', '#movePad'].forEach((s) => { $(s).hidden = false; });
       setTimeout(() => $('#hint').classList.add('off'), 6000);
       try { keyboard(frame.contentWindow); } catch { /* keyboard optional */ }
-      frame.focus();
+      if (!embedded) frame.focus();
     } else if (msg.type === 'error') {
       fail('The 3D view could not start', msg.message || 'Try another browser, or open this link on a computer.');
     } else if (msg.type === 'contextLost') {
@@ -198,15 +245,18 @@ button,select{font:inherit;color:inherit}
   });
 
   async function start() {
-    if (!token) return fail('This link is incomplete', 'Ask the person who shared it for the full link.');
+    if (!demo && !token) return fail('This link is incomplete', 'Ask the person who shared it for the full link.');
     const probe = document.createElement('canvas');
     if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) return fail('3D is not available in this browser', 'Open this link in an up-to-date Chrome, Safari, Edge or Firefox.');
     try {
-      tour = await getJson(`${API}/api/walkthrough/public/${encodeURIComponent(token)}`);
+      const descriptor = demo ? new URL('demo/apartment.json', location.href) : new URL(`${API}/api/walkthrough/public/${encodeURIComponent(token)}`);
+      tour = await getJson(descriptor);
+      tour.scene.modelUrl = new URL(tour.scene.modelUrl, descriptor).href;
       brand();
       status('Getting the 3D view ready…');
-      const manifest = await getJson(tour.pageManifest);
-      const pageRes = await fetch(new URL(manifest.file, tour.pageManifest));
+      const manifestUrl = new URL(tour.pageManifest || `${API}/walkthrough-page/b1/manifest.json`, descriptor);
+      const manifest = await getJson(manifestUrl);
+      const pageRes = await fetch(new URL(manifest.file, manifestUrl), { signal: AbortSignal.timeout(25000) });
       if (!pageRes.ok) throw new Error('The 3D view could not be loaded. Please try again.');
       const template = await pageRes.text();
       if (!template.includes(MARK)) throw new Error('The 3D view is being updated. Please try again in a minute.');
@@ -217,12 +267,15 @@ button,select{font:inherit;color:inherit}
         mode: 'walk', roomIndex: startRoom, night: false, pieces: tour.pieces || {}, resume: null,
       }).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
       const bridge = '<script>window.ReactNativeWebView={postMessage:function(m){try{parent.postMessage({livinai3d:m},"*")}catch(e){}}};<\/script>';
-      const html = template.replace('<head>', '<head>' + bridge).replace(MARK, () => payload);
-      frame.src = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+      const base = `<base href="${esc(new URL('/', manifestUrl).href)}">`;
+      const html = template.replace('<head>', '<head>' + base + bridge).replace(MARK, () => payload);
+      modelPage = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+      frame.src = modelPage;
       frame.hidden = false;
       status('Loading the home…');
       controls();
-      setTimeout(() => { if (!$('#cover').classList.contains('off')) status('Still loading. Large homes can take up to a minute on a slow connection.'); }, 20000);
+      loadingNotice = setTimeout(() => status('Still loading the 3D model…'), 15000);
+      loadDeadline = setTimeout(() => fail('The tour took too long to load', 'Try reloading on a faster connection.'), 90000);
     } catch (e) {
       fail(e.status === 404 ? 'This 3D tour is not available' : 'Something went wrong', e.message);
     }
