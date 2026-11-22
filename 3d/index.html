@@ -52,11 +52,9 @@ button,select{font:inherit;color:inherit}
 .stick-knob{position:absolute;left:50%;top:50%;width:43%;height:43%;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.24);transform:translate(-50%,-50%) translate(var(--stick-x,0px),var(--stick-y,0px));transition:transform .18s ease;pointer-events:none}
 .stick-knob svg{width:48%;height:48%}
 .move-stick.held .stick-knob{transition:none}
-/* On phones the stick sits bottom right, under the thumb, like the app, and
-   keeps a size you can steer by feel instead of shrinking with the screen. */
+/* On phones the stick sits bottom right, under the thumb, like the app. */
 @media (pointer:coarse){
-  .move-stick{--stick-size:clamp(140px,40vw,170px);left:auto;right:max(14px,env(safe-area-inset-right))}
-  .move-stick .direction{font-size:1.15rem}
+  .move-stick{left:auto;right:max(14px,env(safe-area-inset-right))}
 }
 .plan .move-stick,.plan-tools{display:none}
 .plan .plan-tools{left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--glass);box-shadow:0 8px 24px -12px rgba(0,0,0,.4);max-width:calc(100% - 16px)}
