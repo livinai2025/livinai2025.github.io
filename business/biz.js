@@ -8,7 +8,7 @@
   const TEAM_PLAN = {
     currency: 'USD', seatsIncluded: 3, maxSeats: 200, trialDays: 14,
     trialCredits: 10, monthlyCredits: 100, creditsPerExtraSeat: 25,
-    prices: { month: { team: 5900, seat: 1500 }, year: { team: 58800, seat: 14400 } },
+    prices: { month: { team: 9900, seat: 2500 }, year: { team: 94800, seat: 30000 } },
   };
   const money = (cents, currency = TEAM_PLAN.currency) => new Intl.NumberFormat('en-US', {
     style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0,
