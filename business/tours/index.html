@@ -105,6 +105,7 @@ select.mini{padding:0 8px}
 .embed{width:100%;min-height:70px;margin-top:8px;padding:10px;border-radius:10px;border:1px solid var(--line-2);font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical;background:#fff}
 @media (max-width:420px){ .tour{grid-template-columns:1fr} .tour .th{width:100%;aspect-ratio:16/9} }
 </style>
+<link rel="stylesheet" href="/business/signin.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -167,7 +168,7 @@ select.mini{padding:0 8px}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js?v=team-2"></script>
+<script src="/business/biz.js?v=catalogue-1"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -189,10 +190,9 @@ select.mini{padding:0 8px}
     view.innerHTML = `<section class="card panel"><div class="center">
       <span class="eyebrow">Sign in</span>
       <h2 style="font-family:var(--serif);font-weight:400;font-size:2rem">See your 3D plans</h2>
-      <p class="muted">Use the same Google account as the Livinai app.</p>
+      <p class="muted">Sign in using your Livinai account.</p>
       <div class="gbox" id="gBtn"></div></div></section>`;
-    Biz.renderGoogleButton($('#gBtn'), () => load(), (e) => say(e.message))
-      .catch(() => { $('#gBtn').innerHTML = '<p class="note">Google sign-in could not load. Refresh the page.</p>'; });
+    Biz.renderSignIn($('#gBtn'), () => load());
   }
 
   function card(p, canPublish) {

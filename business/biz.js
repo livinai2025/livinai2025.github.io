@@ -44,10 +44,13 @@
     return data;
   }
 
+  const imageType = name => ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' })[name.split('.').pop().toLowerCase()];
+  const isPhoto = type => /^image\/(jpeg|png|webp)$/i.test(type);
+
   /** Read a picked file into a resized JPEG (or PNG, to keep transparency) data URL. */
   function fileToDataUrl(file, { maxSide = 1600, png = false } = {}) {
     return new Promise((resolve, reject) => {
-      if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return reject(new Error('Please choose a JPG, PNG or WebP photo.'));
+      if (!file || (!isPhoto(file.type) && !imageType(file.name))) return reject(new Error('Please choose a JPG, PNG or WebP photo.'));
       if (file.size > 25 * 1024 * 1024) return reject(new Error('That photo is too large. Please use one under 25 MB.'));
       const url = URL.createObjectURL(file);
       const img = new Image();
@@ -69,11 +72,16 @@
     });
   }
 
-  /** An image already on the page (a sample cut-out) as a PNG data URL. */
+  /** Read a sample image as a data URL. */
   async function urlToDataUrl(src) {
     const response = await fetch(src);
     if (!response.ok) throw new Error('The sample image could not load. Try again.');
-    const blob = await response.blob();
+    let blob = await response.blob();
+    if (!isPhoto(blob.type)) {
+      const type = imageType(new URL(src, location.href).pathname);
+      if (!type) throw new Error('That sample is in an unsupported image format.');
+      blob = new Blob([blob], { type });
+    }
     return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(blob); });
   }
 
@@ -89,28 +97,92 @@
     return gisLoading.catch(error => { gisLoading = null; throw error; });
   }
 
-  /** Render a "Sign in with Google" button; resolves the account once signed in. */
-  async function renderGoogleButton(el, onDone, onError) {
-    await loadGoogle();
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: async ({ credential }) => {
+  async function renderSignIn(el, onDone) {
+    el.innerHTML = `<div class="biz-signin">
+      <div data-google></div>
+      <p class="biz-signin-status" data-status role="status"></p>
+      <details data-password>
+        <summary>Sign in with email and password</summary>
+        <form>
+          <label>Email<input name="email" type="email" autocomplete="username" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+          <button type="submit" class="btn btn-primary btn-sm">Sign in</button>
+        </form>
+      </details>
+    </div>`;
+    const googleMount = el.querySelector('[data-google]');
+    const status = el.querySelector('[data-status]');
+    const password = el.querySelector('[data-password]');
+    const form = el.querySelector('form');
+    const submit = form.querySelector('button');
+    let pending = false;
+
+    async function authenticate(path, body) {
+      if (pending || !el.isConnected) return;
+      pending = submit.disabled = true;
+      status.textContent = 'Signing in…';
+      try {
+        const auth = await call(path, { method: 'POST', base: '/api/auth', body, auth: false });
+        if (!auth.accessToken) throw new Error('Livinai did not return a session. Please try signing in again.');
+        store.set('lvb_user', auth.accessToken);
+        let acct;
         try {
-          const auth = await call('/social', { method: 'POST', base: '/api/auth', body: { provider: 'google', identityToken: credential } });
-          store.set('lvb_user', auth.accessToken);
-          const acct = await call('/claim', { method: 'POST' });
-          if (!acct.visitor) store.set('lvb_visitor', null);
-          onDone?.(acct);
-        } catch (e) { onError?.(e); }
-      },
+          acct = path === '/social' ? await call('/claim', { method: 'POST' }) : await call('/me');
+        } catch (error) {
+          if (path !== '/social') throw error;
+          acct = await call('/me');
+        }
+        if (!acct.user) {
+          store.set('lvb_user', null);
+          throw new Error('The session could not be opened. Please sign in again.');
+        }
+        if (!acct.visitor) store.set('lvb_visitor', null);
+        status.textContent = '';
+        await onDone?.(acct);
+      } catch (error) {
+        status.textContent = error.status === 401 && path === '/login'
+          ? 'That email and password did not match a Livinai account.'
+          : error.message;
+      } finally {
+        pending = submit.disabled = false;
+        form.elements.password.value = '';
+      }
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      authenticate('/login', { email: form.elements.email.value.trim(), password: form.elements.password.value });
     });
-    window.google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale: 'en', width: Math.min(320, el.clientWidth || 320) });
+    function googleUnavailable() {
+      if (!el.isConnected || pending) return;
+      status.textContent = 'Google sign-in is unavailable here. If your Livinai account has a password, you can use it below.';
+      password.open = true;
+    }
+    try {
+      await loadGoogle();
+      if (!el.isConnected) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        use_fedcm_for_button: true,
+        callback: ({ credential }) => authenticate('/social', { provider: 'google', identityToken: credential }),
+      });
+      window.google.accounts.id.renderButton(googleMount, {
+        theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale: 'en',
+        width: Math.min(320, Math.round(googleMount.clientWidth) || 320),
+      });
+      setTimeout(() => {
+        const button = googleMount.querySelector('iframe');
+        if (!button || button.getBoundingClientRect().height === 0) googleUnavailable();
+      }, 4500);
+    } catch {
+      googleUnavailable();
+    }
   }
 
   function signOut() { store.set('lvb_user', null); store.set('lvb_visitor', null); }
 
   window.Biz = {
-    API, SITE, TEAM_PLAN, money, store, call, fileToDataUrl, urlToDataUrl, renderGoogleButton, signOut,
+    API, SITE, TEAM_PLAN, money, store, call, fileToDataUrl, urlToDataUrl, renderSignIn, signOut,
     hasSession: () => Boolean(store.get('lvb_user') || store.get('lvb_visitor')),
     me: () => call('/me'),
     session: (d) => call('/session', { method: 'POST', body: d }).then((r) => { store.set('lvb_visitor', r.visitorToken); return r; }),

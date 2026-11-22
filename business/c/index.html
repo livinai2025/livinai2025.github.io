@@ -33,7 +33,7 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.6rem,6vw,4.6rem);l
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-bottom:80px}
 .card{border-radius:24px;background:#fff;border:1px solid var(--line);overflow:hidden;cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{transform:translateY(-3px);box-shadow:var(--sh)}
-.card .im{aspect-ratio:4/3;background:var(--bg-2);position:relative;overflow:hidden}
+.card .im{width:100%;aspect-ratio:4/3;background:var(--bg-2);position:relative;overflow:hidden}
 .card .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
 .card .im img.cut{object-fit:contain;padding:12%}
 .card:hover .im img{transform:scale(1.03)}
@@ -76,7 +76,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
 .tryframe{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px}
 .tryframe[hidden]{display:none}
 .tryframe iframe{position:relative;width:min(720px,100%);height:min(720px,calc(100vh - 32px));border:0;border-radius:24px;background:#fff;box-shadow:var(--sh3)}
-@media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.panel{grid-template-columns:1fr}.gal{min-height:0}.gal .main{aspect-ratio:4/3;min-height:0}}
+@media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.panel{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}.gal{min-height:0;grid-template: auto auto / minmax(0,1fr)}.gal .main{aspect-ratio:4/3;min-height:0;overflow:hidden}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}.actions .btn span{display:none}}
 /* print: a lookbook */
 @media print{
@@ -134,16 +134,18 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
 </div>
 <div class="tryframe" id="tryFrame" hidden><div class="scrim" data-close></div><iframe id="tryIf" title="See it in your room" allow="camera"></iframe></div>
 
-<script src="../biz.js?v=team-2"></script>
+<script src="../biz.js?v=catalogue-1"></script>
+<script src="../sample-catalogue.js"></script>
 <script>
 (async () => {
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const qs = new URLSearchParams(location.search), id = qs.get('id');
+  const sample = qs.get('sample') === 'studio';
   const state = $('#state');
-  if (!id) { state.textContent = 'This catalogue link is missing its id.'; return; }
+  if (!id && !sample) { state.textContent = 'This catalogue link is missing its id.'; return; }
   let cat;
-  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(id) + (qs.get('print') === '1' ? '?count=0' : ''), { auth: false })).catalogue; }
+  try { cat = sample ? window.LivinaiSampleCatalogue : (await Biz.call('/catalogues/' + encodeURIComponent(id) + (qs.get('print') === '1' ? '?count=0' : ''), { auth: false })).catalogue; }
   catch (e) { state.textContent = e.status === 404 ? 'This catalogue could not be found.' : e.message; return; }
 
   document.title = `${cat.title}${cat.brand ? ' · ' + cat.brand : ''}`;
@@ -153,7 +155,9 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   $('#brandEy').textContent = cat.brand ? `${cat.brand} · Collection` : 'Collection';
   $('#title').textContent = cat.title;
   const sceneCount = cat.products.reduce((n, p) => n + p.scenes.length, 0);
-  $('#sub').textContent = cat.products.length
+  $('#sub').textContent = sample
+    ? 'Four sample products with studio photos, styled rooms and example prices. Open a piece to compare images or try it in your own room.'
+    : cat.products.length
     ? `${cat.products.length} ${cat.products.length === 1 ? 'piece' : 'pieces'}${sceneCount ? ` · ${sceneCount} styled ${sceneCount === 1 ? 'scene' : 'scenes'}` : ''}. Select a piece to see details${cat.tryonEnabled ? ' or preview it in your room' : ''}.`
     : 'There are no products in this catalogue right now.';
   $('#foot').textContent = cat.brand ? `© ${new Date().getFullYear()} ${cat.brand}` : '';
@@ -208,6 +212,10 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
     else if (!sheet.hidden) closeProduct();
   });
   $('#tryBtn').addEventListener('click', () => {
+    if (sample) {
+      location.href = `../?piece=${encodeURIComponent(cur.id)}#tryon`;
+      return;
+    }
     frame.src = `../try/?c=${encodeURIComponent(cat.id)}&p=${encodeURIComponent(cur.id)}`;
     tryFrame.hidden = false;
     frame.focus();

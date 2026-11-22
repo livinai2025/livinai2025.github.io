@@ -95,6 +95,7 @@ select.mini{padding:0 8px}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--sage-2);border-top-color:var(--green);animation:spin .8s linear infinite;margin:40px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
+<link rel="stylesheet" href="/business/signin.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -155,7 +156,7 @@ select.mini{padding:0 8px}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js?v=team-3"></script>
+<script src="/business/biz.js?v=catalogue-1"></script>
 <script>
 (() => {
   const plan = () => S.data?.billing?.plan || Biz.TEAM_PLAN;
@@ -196,12 +197,11 @@ select.mini{padding:0 8px}
       <section class="card panel"><div class="center">
         <span class="eyebrow">${inviteToken ? 'You are invited' : 'Sign in'}</span>
         <h2 style="font-family:var(--serif);font-weight:400;font-size:2rem">${inviteToken ? 'Join your team on Livinai' : 'Sign in to your team'}</h2>
-        <p class="muted">${inviteToken ? 'Sign in with the Google account the invitation was sent to. Your seat gives you access to your team’s workspace.' : 'Use the same Google account as the Livinai app. New here? Signing in creates your account.'}</p>
+        <p class="muted">${inviteToken ? 'Sign in using the email address on your invitation to access your team’s workspace.' : 'Use the same Livinai account as in the app. You can also create an account by continuing with Google.'}</p>
         <div class="gbox" id="gBtn"></div>
         <p class="muted" style="font-size:.85rem">By continuing you agree to our <a href="/terms/">terms</a> and <a href="/privacy/">privacy policy</a>.</p>
       </div></section>`;
-    Biz.renderGoogleButton($('#gBtn'), () => load(), (e) => say(e.message))
-      .catch(() => { $('#gBtn').innerHTML = '<p class="note">Google sign-in could not load. Check your connection and refresh the page.</p>'; });
+    Biz.renderSignIn($('#gBtn'), () => load());
   }
 
   /* ───── no team yet ───── */
@@ -468,7 +468,7 @@ select.mini{padding:0 8px}
     body.innerHTML = `
       <section class="card panel">
         <h2>Members <span class="muted" style="font-weight:400">· ${d.seatsUsed} of ${t.seats} seats</span></h2>
-        <p class="sub">Invite by email. They sign in with that Google account and get Pro${t.live ? '' : ' once your plan is active'}.</p>
+        <p class="sub">Invite by email. Teammates sign in with their invited address and get Pro${t.live ? '' : ' once your plan is active'}.</p>
         ${admin ? `<form class="inv" id="invForm" novalidate>
           <input id="invEmail" type="email" autocomplete="off" placeholder="colleague@company.com" aria-label="Email to invite" ${full ? 'disabled' : ''}>
           <button class="btn btn-primary" type="submit" ${full ? 'disabled' : ''}>Invite</button>
@@ -603,7 +603,7 @@ select.mini{padding:0 8px}
       inviteToken = ''; history.replaceState(null, '', location.pathname);
       S.tab = 'overview'; render(); say(`Welcome to ${S.data.team.name}.`);
     } catch (e) {
-      view.innerHTML = `<section class="card panel"><h2>Could not join the team</h2><p class="sub">${esc(e.message)}</p><button class="btn btn-secondary" id="switchAccount">Switch Google account</button></section>`;
+      view.innerHTML = `<section class="card panel"><h2>Could not join the team</h2><p class="sub">${esc(e.message)}</p><button class="btn btn-secondary" id="switchAccount">Switch account</button></section>`;
       $('#switchAccount').addEventListener('click', () => { Biz.signOut(); S.data = null; render(); });
     }
   }

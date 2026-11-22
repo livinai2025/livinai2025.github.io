@@ -625,6 +625,12 @@ input[type=range].slider:focus-visible{outline:2px solid var(--gold);outline-off
 .pick button[aria-pressed="true"]{border-color:var(--green);background:var(--sage)}
 .tool .btn{justify-self:start}
 .tool-note{font-size:.8rem;color:var(--faint)}
+.room-actions{display:flex;flex-wrap:wrap;gap:8px}
+.room-actions [aria-disabled="true"]{opacity:.6;pointer-events:none}
+.room-status:not(:empty){margin:.55rem 0 0;font-size:.88rem;color:var(--muted)}
+.room-status:empty{margin:0}
+#catalogue .sec-head .btn{margin-top:16px}
+.share-empty a{color:var(--green);font-size:.8rem}
 a.chip-float{text-decoration:none;color:var(--ink)}
 
 /* modals */
@@ -688,6 +694,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   .scene-caption .link{grid-column:2}
 }
 </style>
+<link rel="stylesheet" href="signin.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -843,7 +850,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   <div class="wrap">
     <div class="sec-head">
       <div class="t rv"><span class="eyebrow">Catalogue Studio</span><h2>Show your furniture <em class="accent">in a real room setting.</em></h2></div>
-      <p class="lede rv d1">Turn a product photo into a lifestyle image. Add your product details and share a catalogue that links to your store.</p>
+      <div class="rv d1"><p class="lede">Turn a product photo into a lifestyle image. Add your product details and share a catalogue that links to your store.</p><a class="btn btn-light btn-sm" href="c/?sample=studio">Browse the sample catalogue <svg class="arr" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
     </div>
 
     <div class="app rv" id="studioApp">
@@ -951,7 +958,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
                 <button class="btn btn-primary" id="pubBtn">Publish catalogue <svg class="arr"><use href="#i-arrow"/></svg></button>
               </div>
               <div class="share" id="shareBox">
-                <div class="share-empty"><span class="ic"><svg><use href="#i-link"/></svg></span><b>Your links appear here</b><small>Publish to get a share link, a PDF lookbook and a button for your website.</small></div>
+                <div class="share-empty"><span class="ic"><svg><use href="#i-link"/></svg></span><b>Your links appear here</b><small>Publish to get a share link, a printable lookbook and a button for your website.</small><a href="c/?sample=studio">View a published example</a></div>
               </div>
             </div>
           </div>
@@ -974,9 +981,9 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <div class="media rv">
       <div class="frame">
         <div class="ba" id="roomBa">
-          <img class="after" src="img/us-after.webp" alt="A living room shown with new furniture" width="1080" height="564" loading="lazy">
-          <img class="before" src="img/us-before.webp" alt="The living room as it is now" width="1080" height="564" loading="lazy">
-          <span class="lbl l">Empty room</span><span class="lbl r">Staging example</span>
+          <img class="after" src="img/room-with-sora.webp" alt="The same living room with a bouclé chair by the window" width="1080" height="564" loading="lazy">
+          <img class="before" src="img/us-before.webp" alt="An empty living room with a bay window" width="1080" height="564" loading="lazy">
+          <span class="lbl l">Room photo</span><span class="lbl r">Example with Sora chair</span>
           <div class="line"><div class="knob"><svg><use href="#i-lr"/></svg></div></div>
           <input type="range" min="0" max="100" value="50" aria-label="Drag to compare the room before and after">
           <div class="loading" id="roomLoad" hidden><div><span class="spin"></span><b>Placing it in your room</b><p>This usually takes about a minute.</p></div></div>
@@ -987,13 +994,18 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <div class="copy rv d1">
       <span class="eyebrow">See it in your room</span>
       <h2>Let shoppers see furniture <em class="accent">in their own room.</em></h2>
-      <p class="lede">Choose a piece and upload a room photo to see a personalised preview.</p>
+      <p class="lede">Choose a piece, then use the sample room or upload your own photo to see how it looks in the space.</p>
       <div class="tool">
         <div class="tool-step"><span>1</span><b>Choose a piece</b></div>
         <div class="pick" id="roomPick" role="group" aria-label="Choose a piece"></div>
         <div class="tool-step"><span>2</span><b>Add a photo of a room</b></div>
-        <label class="btn btn-primary" id="roomBtn" tabindex="0"><svg><use href="#i-upload"/></svg>Upload a room photo<input type="file" accept="image/jpeg,image/png,image/webp" id="roomIn" hidden></label>
+        <div class="room-actions">
+          <button class="btn btn-primary" type="button" id="roomBtn"><svg aria-hidden="true"><use href="#i-upload"/></svg>Upload a room photo</button>
+          <input type="file" accept="image/jpeg,image/png,image/webp" id="roomIn" hidden>
+          <button class="btn btn-secondary" type="button" id="roomDemo">Use the sample room</button>
+        </div>
         <small class="tool-note" id="roomNote">Uses 1 free image.</small>
+        <p class="room-status" id="roomStatus" role="status"></p>
       </div>
     </div>
   </div>
@@ -1010,7 +1022,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
         </div>
         <iframe class="tour-frame" id="sampleTour" title="Interactive 3D tour of the Livinai sample apartment" allow="fullscreen" allowfullscreen hidden></iframe>
       </div>
-      <figcaption class="tour-caption"><span>Walk through four rooms or switch to a view from above.</span><a href="/3d/?demo=apartment" target="_blank" rel="noopener">Open full tour</a><button type="button" id="tourClose" hidden>Close preview</button></figcaption>
+      <figcaption class="tour-caption"><span>Explore six spaces on foot or from above.</span><a href="/3d/?demo=apartment" target="_blank" rel="noopener">Open full tour</a><button type="button" id="tourClose" hidden>Close preview</button></figcaption>
     </figure>
     <div class="copy rv d1">
       <span class="eyebrow">Floor plan to 3D</span>
@@ -1247,7 +1259,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   <form class="modal-card" id="gateForm" novalidate>
     <button type="button" class="modal-x" data-close aria-label="Close">×</button>
     <span class="ic"><svg><use href="#i-spark"/></svg></span>
-    <h3 id="gateTitle">Try it with your own photos</h3>
+    <h3 id="gateTitle">Start your free trial images</h3>
     <p>Enter your work email for two free images. Use the same email when you sign in with Google to keep your products and scenes.</p>
     <div class="f"><label for="gEmail">Work email</label><input id="gEmail" type="email" autocomplete="email" required placeholder="you@company.com"><span class="err">Please add a valid email.</span></div>
     <div class="row2">
@@ -1283,7 +1295,8 @@ a.chip-float{text-decoration:none;color:var(--ink)}
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="biz.js?v=team-3"></script>
+<script src="biz.js?v=catalogue-1"></script>
+<script src="sample-catalogue.js"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -1426,10 +1439,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   if (document.fonts) document.fonts.ready.then(() => { moveSeg(); spy(); });
 
   /* ═════════ live studio ═════════ */
-  const SAMPLES = [
-    { key: 'armchair', name: 'Bouclé lounge chair', sku: 'SAMPLE-01', material: 'Ivory bouclé, pale wood', colors: ['#F0EBE2', '#B79F7E'], styles: ['Japandi', 'Minimalist'], example: { style: 'Japandi', room: 'Living room', imageUrl: 'img/scene-sample-armchair.webp' } },
-    { key: 'sideboard', name: 'Fluted oak sideboard', sku: 'SAMPLE-02', material: 'Pale oak finish', colors: ['#D5BC91', '#A4845E'], styles: ['Contemporary', 'Scandinavian'], example: { style: 'Contemporary', room: 'Dining room', imageUrl: 'img/scene-sample-sideboard.webp' } },
-  ].map(p => ({ ...p, id: 's-' + p.key, sample: true, cutoutUrl: `img/p-${p.key}.png` }));
+  const SAMPLES = window.LivinaiSampleCatalogue.products;
   const STYLES = ['Japandi', 'Scandinavian', 'Modern', 'Minimalist', 'Mid-century modern', 'Contemporary', 'Mediterranean', 'Industrial', 'Bohemian', 'Coastal', 'Traditional', 'Rustic', 'Classic', 'Luxury'];
   const ROOMS = ['Living room', 'Bedroom', 'Dining room', 'Home office', 'Kitchen', 'Hallway', 'Terrace'];
   let plan = Biz.TEAM_PLAN;
@@ -1554,19 +1564,19 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   function openPaywall(info = {}) {
     const signedIn = info.signedIn || Boolean(S.acct?.user);
     $('#payTitle').textContent = info.signinOnly ? 'Sign in to Livinai' : signedIn ? 'Get Livinai Pro to keep going' : "You've used your free tries";
-    $('#payText').textContent = info.signinOnly ? 'Use the Google account you use in the Livinai app. Your plan and coins work here too.'
+    $('#payText').textContent = info.signinOnly ? 'Use the same Livinai account as in the app. Your plan and coins work here too.'
       : signedIn ? 'Subscribe or buy coins in the Livinai app with this same account, then come back and continue here.'
-      : 'Sign in with Google using the same email to keep your products. Continue with Livinai Pro, coins or a Team subscription.';
+      : 'Sign in to your Livinai account to continue with Pro, coins or a Team subscription.';
     $('#paySignin').hidden = signedIn; $('#payStore').hidden = !signedIn;
     openModal('payModal');
     if (!signedIn) {
       const box = $('#gBtn'); box.innerHTML = '';
-      Biz.renderGoogleButton(box, async acct => {
+      Biz.renderSignIn(box, async acct => {
         updateAccount(acct); await refresh();
         const u = S.acct?.user; const canPay = u && (u.subscribed || u.freeLeft || u.coins >= u.coinCost);
         if (u && (info.signinOnly || canPay)) { closeModal('payModal', true); say(`Signed in as ${u.email}.`); }
         else openPaywall({ signedIn: true });
-      }, err => say(err.message)).catch(() => { box.innerHTML = '<p class="fine">Google sign-in could not load. Please try again later.</p>'; });
+      });
     }
     payPromise ||= new Promise(resolve => { payResolve = resolve; });
     return payPromise;
@@ -1833,7 +1843,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     if (!$('#cBrand').value && S.acct?.visitor?.company) $('#cBrand').value = S.acct.visitor.company;
     $('#catGrid').innerHTML = real().map(p => `<div class="ccard${S.picked.has(p.id) ? ' on' : ''}" data-id="${esc(p.id)}" role="checkbox" aria-checked="${S.picked.has(p.id)}" tabindex="0"><span class="chk"></span><div class="im"><img src="${esc(p.cutoutUrl)}" alt=""></div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.price || '')} · ${S.scenes.filter(s => s.product === p.id).length} scenes</small></div></div>`).join('');
   }
-  $('#catGrid').addEventListener('click', e => { const c = e.target.closest('.ccard'); if (!c) return; const id = c.dataset.id; if (S.picked.has(id)) S.picked.delete(id); else if (S.picked.size < 300) S.picked.add(id); else return say('Select up to 300 products.'); fillPublish(); $('#catGrid [data-id= + id + ]')?.focus(); });
+  $('#catGrid').addEventListener('click', e => { const c = e.target.closest('.ccard'); if (!c) return; const id = c.dataset.id; if (S.picked.has(id)) S.picked.delete(id); else if (S.picked.size < 300) S.picked.add(id); else return say('Select up to 300 products.'); fillPublish(); [...$('#catGrid').children].find(item => item.dataset.id === id)?.focus(); });
   $('#catGrid').addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && e.target.closest('.ccard')) { e.preventDefault(); e.target.click(); } });
   $('#pubBtn').addEventListener('click', async () => {
     if (S.busy) return;
@@ -1866,7 +1876,8 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   });
 
   /* see it in your room */
-  let roomPick = SAMPLES[0];
+  const demoPiece = new URLSearchParams(location.search).get('piece');
+  let roomPick = SAMPLES.find(product => product.id === demoPiece) || SAMPLES[0];
   function renderPick() {
     const list = [...real(), ...SAMPLES];
     if (!list.includes(roomPick)) roomPick = list[0];
@@ -1877,27 +1888,49 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       for (const item of $('#roomPick').children) item.setAttribute('aria-pressed', item === b);
     }); $('#roomPick').appendChild(b); });
   }
-  $('#roomBtn').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#roomIn').click(); } });
-  $('#roomIn').addEventListener('change', async () => {
-    const f = $('#roomIn').files[0]; $('#roomIn').value = ''; if (!f || S.busy) return;
+  const roomBtn = $('#roomBtn'), roomIn = $('#roomIn'), roomDemo = $('#roomDemo'), roomStatus = $('#roomStatus');
+  roomBtn.addEventListener('click', () => { if (!S.busy) roomIn.click(); });
+  roomIn.addEventListener('change', () => {
+    const file = roomIn.files[0];
+    roomIn.value = '';
+    if (file) makeRoomPreview(() => Biz.fileToDataUrl(file, { maxSide: 1600 }));
+  });
+  roomDemo.addEventListener('click', () => makeRoomPreview(() => Biz.urlToDataUrl('img/us-before.webp')));
+
+  async function makeRoomPreview(getRoomImage) {
+    if (S.busy) return;
     const p = roomPick;
     S.busy = true;
+    roomBtn.setAttribute('aria-disabled', 'true');
+    roomDemo.setAttribute('aria-disabled', 'true');
+    roomStatus.textContent = '';
     const ba = $('#roomBa');
     try {
-      const roomImage = await Biz.fileToDataUrl(f, { maxSide: 1600 });
+      const roomImage = await getRoomImage();
       if (!(await ensureSession())) return;
       $('#roomLoad').hidden = false;
+      roomStatus.textContent = 'Creating your preview…';
       const body = p.sample ? { productImage: await Biz.urlToDataUrl(p.cutoutUrl), productName: p.name, roomImage } : { productId: p.id, roomImage };
       const d = await paid(() => Biz.call('/tryon', { method: 'POST', body }));
-      if (d) {
-        updateAccount(d);
-        $('.before', ba).src = d.scene.beforeUrl; $('.after', ba).src = d.scene.imageUrl;
-        $('.lbl.l', ba).textContent = 'Original room'; $('.lbl.r', ba).textContent = 'With ' + p.name; roomBA.set(50);
-        $('#roomDl').href = d.scene.imageUrl; $('#roomDl').hidden = false; say('Here it is in your room. Drag to compare.');
-      }
-    } catch (e) { say(e.message); }
-    finally { $('#roomLoad').hidden = true; S.busy = false; }
-  });
+      if (!d) { roomStatus.textContent = ''; return; }
+      updateAccount(d);
+      const before = $('.before', ba), after = $('.after', ba);
+      before.src = d.scene.beforeUrl; before.alt = 'Original room photo';
+      after.src = d.scene.imageUrl; after.alt = 'Room preview with ' + p.name;
+      $('.lbl.l', ba).textContent = 'Original room'; $('.lbl.r', ba).textContent = 'With ' + p.name;
+      roomBA.set(50);
+      $('#roomDl').href = d.scene.imageUrl;
+      $('#roomDl').hidden = false;
+      roomStatus.textContent = 'Your preview is ready. Drag the image slider to compare.';
+    } catch (e) {
+      roomStatus.textContent = e.message;
+    } finally {
+      $('#roomLoad').hidden = true;
+      roomBtn.removeAttribute('aria-disabled');
+      roomDemo.removeAttribute('aria-disabled');
+      S.busy = false;
+    }
+  }
 
   renderLib(); fillDetail(); renderPick(); go(2); renderAcct(); refresh();
 

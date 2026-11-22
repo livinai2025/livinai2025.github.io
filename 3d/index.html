@@ -249,7 +249,7 @@ button,select{font:inherit;color:inherit}
     const probe = document.createElement('canvas');
     if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) return fail('3D is not available in this browser', 'Open this link in an up-to-date Chrome, Safari, Edge or Firefox.');
     try {
-      const descriptor = demo ? new URL('demo/apartment.json', location.href) : new URL(`${API}/api/walkthrough/public/${encodeURIComponent(token)}`);
+      const descriptor = demo ? new URL('demo/apartment.json?v=2', location.href) : new URL(`${API}/api/walkthrough/public/${encodeURIComponent(token)}`);
       tour = await getJson(descriptor);
       tour.scene.modelUrl = new URL(tour.scene.modelUrl, descriptor).href;
       brand();
