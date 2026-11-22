@@ -54,7 +54,8 @@ button,select{font:inherit;color:inherit}
 .move-stick.held .stick-knob{transition:none}
 /* On phones the stick sits bottom right, under the thumb, like the app. */
 @media (pointer:coarse){
-  .move-stick{left:auto;right:max(14px,env(safe-area-inset-right))}
+  .move-stick{--stick-size:clamp(84px,15dvh,112px);left:auto;right:max(14px,env(safe-area-inset-right))}
+  .move-stick .direction{font-size:.85rem}
 }
 .plan .move-stick,.plan-tools{display:none}
 .plan .plan-tools{left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--glass);box-shadow:0 8px 24px -12px rgba(0,0,0,.4);max-width:calc(100% - 16px)}
@@ -79,8 +80,8 @@ button,select{font:inherit;color:inherit}
 .cover{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#eef1ef;text-align:center;transition:opacity .4s}
 .cover.off{opacity:0;pointer-events:none}
 .cover .box{max-width:380px;display:grid;gap:14px;justify-items:center}
-.cover h1{margin:0;font-family:var(--serif);font-weight:400;font-size:1.8rem;line-height:1.15}
-.cover p{margin:0;color:var(--muted)}
+.cover h1{margin:0;font-family:var(--serif);font-weight:400;font-size:1.3rem;line-height:1.2}
+.cover p{margin:0;color:var(--muted);font-size:.85rem}
 .cover a{color:var(--accent);font-weight:500}
 .spin{width:36px;height:36px;border-radius:50%;border:3px solid rgba(17,26,21,.12);border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
