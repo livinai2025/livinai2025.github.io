@@ -63,7 +63,7 @@
     if (window.google?.accounts?.id) return Promise.resolve();
     gisLoading ??= new Promise((resolve, reject) => {
       const s = document.createElement('script');
-      s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+      s.src = 'https://accounts.google.com/gsi/client?hl=en'; s.async = true;
       s.onload = resolve; s.onerror = () => reject(new Error('Google sign-in could not load.'));
       document.head.appendChild(s);
     });

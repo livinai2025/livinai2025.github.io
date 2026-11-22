@@ -746,7 +746,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       <a href="#pricing">Pricing</a>
     </nav>
     <div class="hdr-cta">
-      <a class="plain" href="#faq">FAQ</a>
+      <a class="plain" href="account/">Team account</a>
       <a class="btn btn-primary btn-sm" href="#demo">Book a demo</a>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mnav"><svg><use href="#i-menu"/></svg></button>
     </div>
@@ -758,6 +758,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <a href="#features">Features <svg width="16" height="16"><use href="#i-chev"/></svg></a>
     <a href="#pricing">Pricing <svg width="16" height="16"><use href="#i-chev"/></svg></a>
     <a href="#faq">FAQ <svg width="16" height="16"><use href="#i-chev"/></svg></a>
+    <a href="account/">Team account <svg width="16" height="16"><use href="#i-chev"/></svg></a>
     <a class="btn btn-primary" href="#demo">Book a demo</a>
   </nav>
 </header>
@@ -883,11 +884,11 @@ a.chip-float{text-decoration:none;color:var(--ink)}
           <div class="view on" data-view="0">
             <div class="view-head"><div><h3>Add a product</h3><p>One clear photo of one piece. A plain background works best.</p></div></div>
             <label class="drop" id="drop" tabindex="0">
-              <input type="file" accept="image/jpeg,image/png,image/webp" id="fileIn">
+              <input type="file" accept="image/jpeg,image/png,image/webp" id="fileIn" multiple>
               <div>
                 <div class="up"><svg><use href="#i-upload"/></svg></div>
-                <b>Drop a product photo, or click to choose</b>
-                <p>JPG, PNG or WebP. Adding products is free.</p>
+                <b>Drop product photos, or click to choose</b>
+                <p>One piece per photo. Add up to 20 at once. JPG, PNG or WebP. Adding products is free.</p>
               </div>
             </label>
             <div class="samples"><span>Or explore a sample</span><span id="sampleBtns" style="display:contents"></span></div>
@@ -901,7 +902,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
                   <li><i></i>Removing the background</li>
                   <li><i></i>Saving it to your library</li>
                 </ol>
-                <p class="note" style="margin:0">Usually 20 to 40 seconds.</p>
+                <p class="note" style="margin:0" id="procNote">Usually 20 to 40 seconds.</p>
               </div>
             </div>
           </div>
@@ -1023,11 +1024,11 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <div class="copy rv d1">
       <span class="eyebrow">Floor plan to 3D</span>
       <h2>Walk buyers through homes <em class="accent">not yet built.</em></h2>
-      <p class="lede">Upload a floor plan. Livinai finds the rooms, furnishes them and gives you a 3D walkthrough anyone can explore on their phone.</p>
+      <p class="lede">Draw the floor plan in the Livinai app, choose a style for each room, and walk through the furnished home in 3D on your phone.</p>
       <ol class="clean steps">
-        <li><span><b>Upload the plan</b><span>A drawn plan, an architect's sheet or a photo of one.</span></span></li>
-        <li><span><b>Choose a style</b><span>Every room is furnished to match, with a kitchen layout you pick.</span></span></li>
-        <li><span><b>Share the walkthrough</b><span>Send it by email or link, for off-plan sales and client meetings.</span></span></li>
+        <li><span><b>Draw the plan</b><span>Trace the rooms to scale on a metric grid, from your architect's drawing.</span></span></li>
+        <li><span><b>Choose a style</b><span>Give each room its type and style, and pick the kitchen layout.</span></span></li>
+        <li><span><b>Walk through and share</b><span>Explore it in real time, and share the plan with colleagues and clients by email.</span></span></li>
       </ol>
     </div>
   </div>
@@ -1080,10 +1081,10 @@ a.chip-float{text-decoration:none;color:var(--ink)}
         <img class="deco" src="img/p-sectional.png" alt="">
       </article>
       <article class="bx b-half rv d1">
-        <div class="tx"><span class="tag">Early access</span><h3>Team workspace</h3><p>Shared seats, brand style presets and one bill for the whole team.</p></div>
+        <div class="tx"><span class="tag">New</span><h3>Team workspace</h3><p>Pro for every seat, one shared product library, your logo on catalogues, a usage dashboard and one bill.</p></div>
         <div class="foot">
           <div class="avatars" aria-hidden="true"><span style="background:#164a37">AK</span><span style="background:#b4874a">SM</span><span style="background:#2f7659">JL</span><span style="background:#646d67">+5</span></div>
-          <a class="link" href="#pricing"><span>See Team plan</span><svg><use href="#i-arrow"/></svg></a>
+          <a class="link" href="account/?plan=team"><span>Start a team</span><svg><use href="#i-arrow"/></svg></a>
         </div>
       </article>
     </div>
@@ -1119,10 +1120,10 @@ a.chip-float{text-decoration:none;color:var(--ink)}
         <div><div class="k">You could save every year</div><div class="big" id="oSave">$15,852</div></div>
         <div class="roi-rows">
           <div><span>Today, per month</span><b id="oToday">$1,400</b></div>
-          <div><span>Livinai Team, per month</span><b>$79</b></div>
+          <div><span>Livinai Team (3 seats), per month</span><b>$79</b></div>
           <div><span>Waiting saved, per month</span><b id="oDays">40 days</b></div>
         </div>
-        <a class="btn btn-light" href="#demo">Start saving <svg class="arr"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-light" href="account/?plan=team">Start your team <svg class="arr"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </div>
@@ -1143,13 +1144,13 @@ a.chip-float{text-decoration:none;color:var(--ink)}
         <div class="plan-top"><h3>Pro</h3></div>
         <p class="who">For one agent, designer or host.</p>
         <div class="price"><b data-m="$12.99" data-y="$5">$5</b><span class="per">/ month</span></div>
-        <div class="sub" data-m="Billed monthly. Cancel any time." data-y="Billed $59.99 a year. 3-day free trial.">Billed $59.99 a year. 3-day free trial.</div>
+        <div class="sub" data-m="Billed monthly in the app. Cancel any time." data-y="Billed $59.99 a year in the app. Cancel any time.">Billed $59.99 a year in the app. Cancel any time.</div>
         <ul class="clean ticks">
           <li><svg><use href="#i-check"/></svg>Up to 20 designs a day</li>
           <li><svg><use href="#i-check"/></svg>All 14 styles, interiors and exteriors</li>
           <li><svg><use href="#i-check"/></svg>Floor plan 3D walkthroughs</li>
-          <li><svg><use href="#i-check"/></svg>Shop this look</li>
-          <li><svg><use href="#i-check"/></svg>No ads, no watermark</li>
+          <li><svg><use href="#i-check"/></svg>Catalogue Studio and shopper try-ons on the web</li>
+          <li><svg><use href="#i-check"/></svg>Shop this look, no ads, no watermark</li>
         </ul>
         <div class="stores">
           <a class="store" href="https://apps.apple.com/app/id6800486898" rel="noopener"><svg><use href="#i-apple"/></svg><span><small>Download on the</small><b>App Store</b></span></a>
@@ -1162,30 +1163,30 @@ a.chip-float{text-decoration:none;color:var(--ink)}
         <div class="price"><b data-m="$99" data-y="$79">$79</b><span class="per">/ month</span></div>
         <div class="sub" data-m="Billed monthly. Cancel any time." data-y="Billed $948 a year.">Billed $948 a year.</div>
         <ul class="clean ticks">
-          <li><svg><use href="#i-check"/></svg>Everything in Pro, for 3 seats</li>
-          <li><svg><use href="#i-check"/></svg>Catalogue Studio, up to 100 products</li>
-          <li><svg><use href="#i-check"/></svg>Shoppable scenes and PDF lookbooks</li>
-          <li><svg><use href="#i-check"/></svg>Your logo on shared pages</li>
-          <li><svg><use href="#i-check"/></svg>Priority rendering and support</li>
+          <li><svg><use href="#i-check"/></svg>Everything in Pro for 3 people, +$25/month per extra seat</li>
+          <li><svg><use href="#i-check"/></svg>One shared product library and catalogues</li>
+          <li><svg><use href="#i-check"/></svg>Your logo on catalogues and try-ons</li>
+          <li><svg><use href="#i-check"/></svg>Usage dashboard and bulk product upload</li>
+          <li><svg><use href="#i-check"/></svg>One bill, with company invoices</li>
         </ul>
-        <a class="btn btn-light" href="#demo" data-plan="Team">Get early access <svg class="arr"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-light" id="teamBuy" href="account/?plan=team&amp;cycle=year">Start Team plan <svg class="arr"><use href="#i-arrow"/></svg></a>
       </div>
       <div class="plan rv d2">
         <div class="plan-top"><h3>Enterprise</h3></div>
-        <p class="who">For retailers, portals and developers.</p>
+        <p class="who">For retailers, portals and large agencies.</p>
         <div class="price"><b>Custom</b></div>
-        <div class="sub">Volume pricing for large catalogues.</div>
+        <div class="sub">For 20 seats or more.</div>
         <ul class="clean ticks">
-          <li><svg><use href="#i-check"/></svg>Unlimited seats and products</li>
-          <li><svg><use href="#i-check"/></svg>"See it in your room" for your website</li>
-          <li><svg><use href="#i-check"/></svg>API and white-label options</li>
-          <li><svg><use href="#i-check"/></svg>Custom brand styles</li>
+          <li><svg><use href="#i-check"/></svg>Everything in Team</li>
+          <li><svg><use href="#i-check"/></svg>Volume pricing on seats</li>
+          <li><svg><use href="#i-check"/></svg>We set up your catalogue and website button with you</li>
+          <li><svg><use href="#i-check"/></svg>Pay yearly by invoice</li>
           <li><svg><use href="#i-check"/></svg>A dedicated contact</li>
         </ul>
         <a class="btn btn-secondary" href="#demo" data-plan="Enterprise">Contact us</a>
       </div>
     </div>
-    <p class="fine-c rv">Team and Enterprise are in early access. Founding customers keep their price.</p>
+    <p class="fine-c rv">Prices in US dollars. Tax is added at checkout where it applies. Pro is billed by the App Store or Google Play; Team by Paddle, our payment reseller.</p>
   </div>
 </section>
 
@@ -1203,12 +1204,14 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       </div>
     </div>
     <div class="faq rv d1" id="faqList">
-      <details open><summary>Is Catalogue Studio available today?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>It's in early access. We are onboarding furniture and decor brands one by one so each catalogue looks right. Book a demo and we'll set yours up with you.</p></div></details>
+      <details open><summary>Is Catalogue Studio available today?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes. Try it on this page with 2 free pictures. Livinai Pro or a Team plan lets you keep going, up to 20 pictures a day for each person.</p></div></details>
+      <details><summary>How does the Team plan work?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>The owner starts the plan in <a href="account/">Team account</a> and invites colleagues by email. Everyone signs in with their own Google account and gets Livinai Pro in the app and on the website. Products and catalogues are shared by the whole team.</p></div></details>
+      <details><summary>How do I pay, and can I cancel?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>The Team plan is paid by card, PayPal, Apple Pay or Google Pay through Paddle, which sends company invoices with the right tax. Add seats any time. Cancel in Manage billing; your team keeps access until the end of the period you paid for.</p></div></details>
       <details><summary>Do I need 3D models or a studio photo?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>No. A clear photo of the product is enough to start. A plain background and a few angles give the best results.</p></div></details>
       <details><summary>How fast is it?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>A room design takes about 30 seconds. A 3D walkthrough from a floor plan takes a few minutes.</p></div></details>
       <details><summary>Can I use the images in listings and ads?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes, the images you make are yours to use. For property listings, mark them as "virtually staged" where local rules ask for it.</p></div></details>
       <details><summary>Does it work in my country?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes. Livinai works worldwide on iOS and Android, and Shop this look searches stores in your own country.</p></div></details>
-      <details><summary>Can it connect to our website or systems?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>On Enterprise, yes: a "See it in your room" button for your product pages, an API and white-label options. Tell us what you use and we'll show you how it fits.</p></div></details>
+      <details><summary>Can it connect to our website or systems?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes. Every catalogue you publish gives you one line of code that adds a "See it in your room" button to your product pages. Shopper try-ons are included with Pro and Team. Using something else? Tell us and we'll help.</p></div></details>
       <details><summary>What happens to our photos?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>We only use them to make your designs. Read the details in our <a href="/privacy/">privacy policy</a>.</p></div></details>
     </div>
   </div>
@@ -1223,8 +1226,8 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       <p class="lede" style="margin-top:20px">A 15-minute call. Send us a listing, a floor plan or a product photo and we'll show you the result live.</p>
       <ul class="clean demo-list">
         <li><svg><use href="#i-tick"/></svg>Results made from your own photos</li>
-        <li><svg><use href="#i-tick"/></svg>Early access to Catalogue Studio</li>
-        <li><svg><use href="#i-tick"/></svg>Founding-customer pricing for early teams</li>
+        <li><svg><use href="#i-tick"/></svg>Help setting up your catalogue and website button</li>
+        <li><svg><use href="#i-tick"/></svg>Volume pricing for 20 seats or more</li>
         <li><svg><use href="#i-tick"/></svg>No commitment, no card needed</li>
       </ul>
       <p class="contact-alt">Prefer email? Write to <a href="mailto:livinai2025@gmail.com?subject=Livinai%20for%20Business">livinai2025@gmail.com</a></p>
@@ -1394,7 +1397,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       stat: '1 photo', statTxt: 'A month of Pro costs about the same as one human-staged photo.', img: 'us-after.webp', alt: 'Staged US living room with curved sofa' },
     { k: 'furniture', icon: 'i-sofa', tab: 'Furniture brands', pill: 'For furniture and decor brands', title: 'Turn product photos into a catalogue that sells.',
       list: ['Upload a piece and get styled room scenes', 'Shoppable scenes that link to your store', 'Shoppers see your piece in their own room'],
-      stat: 'New', statTxt: 'Catalogue Studio is in early access for brands.', img: 'scene-walnut.webp', alt: 'Living room with walnut slat wall', link: ['#catalogue', 'Try Catalogue Studio'] },
+      stat: 'Live', statTxt: 'Try Catalogue Studio free, right on this page.', img: 'scene-walnut.webp', alt: 'Living room with walnut slat wall', link: ['#catalogue', 'Try Catalogue Studio'] },
     { k: 'designers', icon: 'i-pen', tab: 'Interior studios', pill: 'For interior designers', title: 'Five concepts before lunch.',
       list: ['Show clients several styles on their own room', 'Swap walls, floors and colours in seconds', 'Bring a 3D walkthrough to the first meeting'],
       stat: '14', statTxt: 'Design styles, from Japandi to Mediterranean.', img: 'scene-living.webp', alt: 'Minimal living room with beams and bouclé sofa' },
@@ -1471,17 +1474,17 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   function renderAcct() {
     const a = S.acct; pill.className = 'acct';
     if (a?.user) {
-      if (a.user.subscribed) { pill.textContent = 'Pro'; pill.classList.add('pro'); }
+      if (a.user.subscribed) { pill.textContent = a.team?.live ? 'Team' : 'Pro'; pill.classList.add('pro'); }
       else { pill.textContent = a.user.freeLeft ? `${a.user.freeLeft} free left` : `${a.user.coins} coins`; if (!a.user.freeLeft && a.user.coins < a.user.coinCost) pill.classList.add('out'); }
     } else if (a?.visitor) { pill.textContent = `${a.trialsLeft} free ${a.trialsLeft === 1 ? 'try' : 'tries'} left`; if (!a.trialsLeft) pill.classList.add('out'); }
     else pill.textContent = '2 free tries';
-    const uses = !a?.user ? (a?.visitor && !a.trialsLeft ? 'No free tries left' : 'Uses 1 free try') : a.user.subscribed ? 'Included in your Pro plan' : a.user.freeLeft ? 'Uses 1 free design' : `Uses ${a.user.coinCost} coin${a.user.coinCost === 1 ? '' : 's'}`;
+    const uses = !a?.user ? (a?.visitor && !a.trialsLeft ? 'No free tries left' : 'Uses 1 free try') : a.user.subscribed ? `Included in your ${a.team?.live ? 'Team' : 'Pro'} plan` : a.user.freeLeft ? 'Uses 1 free design' : `Uses ${a.user.coinCost} coin${a.user.coinCost === 1 ? '' : 's'}`;
     $('#roomNote').textContent = `${uses}. Your photo is only used to make this picture.`;
     renderSceneNote();
   }
   pill.addEventListener('click', () => {
     const a = S.acct;
-    if (a?.user) say(`Signed in as ${a.user.email}${a.user.subscribed ? ' · Livinai Pro' : ''}`);
+    if (a?.user) say(`Signed in as ${a.user.email}${a.team?.live ? ` · ${a.team.name}` : a.user.subscribed ? ' · Livinai Pro' : ''}`);
     else if (a?.visitor) say(`${a.visitor.email} · ${a.trialsLeft} free ${a.trialsLeft === 1 ? 'try' : 'tries'} left`);
     else openGate();
   });
@@ -1623,16 +1626,38 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   const drop = $('#drop'), fileIn = $('#fileIn');
   ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) addProduct(f); });
+  drop.addEventListener('drop', e => addProducts(e.dataTransfer.files));
   drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } });
-  fileIn.addEventListener('change', () => { const f = fileIn.files[0]; fileIn.value = ''; if (f) addProduct(f); });
+  fileIn.addEventListener('change', () => { const fs = [...fileIn.files]; fileIn.value = ''; addProducts(fs); });
   $('#libAdd').addEventListener('click', () => { go(0); $('#studioApp').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); });
 
-  async function addProduct(file) {
-    if (S.busy) return;
-    let image;
-    try { image = await Biz.fileToDataUrl(file, { maxSide: 1600 }); } catch (e) { return say(e.message); }
+  /** Add several photos one after another. Stops on a daily limit; skips a photo that is not a product. */
+  const BULK_MAX = 20;
+  async function addProducts(list) {
+    const files = [...(list || [])].filter(Boolean);
+    if (!files.length || S.busy) return;
+    if (files.length === 1) return addProduct(files[0]);
+    if (files.length > BULK_MAX) say(`Adding the first ${BULK_MAX} photos. Add the rest after.`);
+    const batch = files.slice(0, BULK_MAX);
     if (!(await ensureSession())) return;
+    let added = 0, skipped = 0;
+    for (let i = 0; i < batch.length; i += 1) {
+      $('#procNote').textContent = `Photo ${i + 1} of ${batch.length}. Keep this page open.`;
+      const r = await addProduct(batch[i], { bulk: true });
+      if (r === 'ok') added += 1;
+      else if (r === 'stop') { skipped += batch.length - i; break; }
+      else skipped += 1;
+    }
+    $('#procNote').textContent = 'Usually 20 to 40 seconds.';
+    if (added) { select(S.products[0]); go(1); }
+    say(`${added} product${added === 1 ? '' : 's'} added${skipped ? `, ${skipped} skipped` : ''}.`);
+  }
+
+  async function addProduct(file, { bulk = false } = {}) {
+    if (S.busy) return 'busy';
+    let image;
+    try { image = await Biz.fileToDataUrl(file, { maxSide: 1600 }); } catch (e) { if (!bulk) say(e.message); return 'skip'; }
+    if (!bulk && !(await ensureSession())) return 'skip';
     go(0); S.busy = true;
     const proc = $('#proc'), lis = $$('#procList li'), bar = $('#procBar');
     $('#procImg').src = image; lis.forEach(l => l.className = ''); proc.classList.add('on');
@@ -1643,8 +1668,10 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       clearInterval(t); while (i <= lis.length) adv(); bar.style.width = '100%';
       S.products.unshift(d.product); S.picked.add(d.product.id);
       await new Promise(r => setTimeout(r, 400));
-      select(d.product); renderPick(); go(1); say('Done. Check the details, then make a room scene.');
-    } catch (e) { clearInterval(t); say(e.message); }
+      renderLib(); renderPick();
+      if (!bulk) { select(d.product); go(1); say('Done. Check the details, then make a room scene.'); }
+      return 'ok';
+    } catch (e) { clearInterval(t); say(e.message); return e.status === 429 || e.status === 401 || e.status === 503 ? 'stop' : 'skip'; }
     finally { proc.classList.remove('on'); S.busy = false; }
   }
 
@@ -1667,7 +1694,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     $('#genBtn').innerHTML = p.sample ? '<svg><use href="#i-upload"/></svg>Upload your product' : '<svg><use href="#i-spark"/></svg>Generate scene';
     $('#scNote').textContent = p.sample ? 'These are example pictures. Upload your own product to make real scenes with it.'
       : !a?.user ? `Each scene uses 1 free try (${a?.trialsLeft ?? 2} left). After that, continue with your Livinai account.`
-      : a.user.subscribed ? 'Included in your Livinai Pro plan.' : a.user.freeLeft ? `Uses 1 of your ${a.user.freeLeft} free designs.` : `Uses ${a.user.coinCost} coin${a.user.coinCost === 1 ? '' : 's'} (you have ${a.user.coins}).`;
+      : a.user.subscribed ? `Included in your ${a.team?.live ? 'Team' : 'Livinai Pro'} plan.` : a.user.freeLeft ? `Uses 1 of your ${a.user.freeLeft} free designs.` : `Uses ${a.user.coinCost} coin${a.user.coinCost === 1 ? '' : 's'} (you have ${a.user.coins}).`;
   }
   function fillScenes() {
     const p = S.cur; renderSceneNote(); roomSel.disabled = !!p.sample;
@@ -1728,7 +1755,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
           <a class="link" href="${esc(link)}" target="_blank" rel="noopener"><span>Open catalogue</span><svg><use href="#i-arrow"/></svg></a></div>
         <div class="card-s"><b>PDF lookbook</b><small>Opens a print-ready version. Choose "Save as PDF".</small>
           <a class="btn btn-secondary btn-sm" href="${esc(link)}&print=1" target="_blank" rel="noopener"><svg><use href="#i-file"/></svg>Download PDF</a></div>
-        <div class="card-s"><b>"See it in your room" button</b><small>Paste this into your website. ${pro ? 'Shopper try-ons are included in your Pro plan.' : 'Shopper try-ons switch on with Livinai Pro.'}</small>
+        <div class="card-s"><b>"See it in your room" button</b><small>Paste this into your website. ${pro ? 'Shopper try-ons are included in your plan.' : 'Shopper try-ons switch on with Livinai Pro or a Team plan.'}</small>
           <textarea readonly aria-label="Website code">${esc(code)}</textarea><button class="btn btn-secondary btn-sm" data-copy="${esc(code)}">Copy code</button></div>`;
       say('Your catalogue is live.');
     } catch (e) { say(e.message); }
@@ -1808,6 +1835,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   $$('.toggle button').forEach(b => b.addEventListener('click', () => {
     $$('.toggle button').forEach(x => x.setAttribute('aria-pressed', x === b));
     $$('[data-m]').forEach(el => el.textContent = el.dataset[b.dataset.bill]);
+    $('#teamBuy').href = `account/?plan=team&cycle=${b.dataset.bill === 'm' ? 'month' : 'year'}`;
   }));
   $$('[data-plan]').forEach(a => a.addEventListener('click', () => { const m = $('#dMsg'); if (!m.value) m.value = `I'm interested in the ${a.dataset.plan} plan.`; }));
 

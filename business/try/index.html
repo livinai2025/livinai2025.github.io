@@ -18,7 +18,8 @@
 button,input{font:inherit;color:inherit}img{display:block;max-width:100%}
 .app{display:grid;grid-template-rows:auto 1fr auto;height:100%;max-width:760px;margin:0 auto}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
-header b{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:1.35rem;letter-spacing:-.02em}
+header b{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:1.35rem;letter-spacing:-.02em;display:flex;align-items:center;gap:12px}
+header b img{max-height:30px;max-width:140px;width:auto}
 .x{width:36px;height:36px;border-radius:50%;border:0;background:var(--bg);font-size:1.3rem;cursor:pointer}
 main{padding:20px;display:grid;gap:16px;align-content:start;overflow:auto}
 .pick{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
@@ -70,8 +71,9 @@ small.note{color:var(--faint);font-size:.78rem}
   const err = m => { $('#err').textContent = m; $('#err').hidden = !m; };
   $('#close').onclick = () => { if (parent !== window) parent.postMessage('livinai-try-close', '*'); else history.back(); };
   let cat, cur;
-  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid))).catalogue; }
+  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid) + '?count=0')).catalogue; }
   catch (e) { err(e.status === 404 ? 'This catalogue could not be found.' : e.message); $('#upBtn').hidden = true; return; }
+  if (cat.logoUrl) { const im = new Image(); im.src = cat.logoUrl; im.alt = cat.brand || ''; $('header b').prepend(im); }
   if (!cat.tryonEnabled) { $('#ph').innerHTML = '<div><b>Room previews are coming soon</b>This store has not switched them on yet.</div>'; $('#upBtn').hidden = true; }
   cur = cat.products.find(p => p.id === qs.get('p')) || cat.products[0];
   const renderPick = () => {
