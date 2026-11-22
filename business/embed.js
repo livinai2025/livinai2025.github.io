@@ -25,19 +25,31 @@
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V19a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1Z"/></svg>';
   btn.appendChild(document.createTextNode(label));
 
-  var ov = null;
-  function close() { if (ov) { ov.remove(); ov = null; document.documentElement.style.overflow = ''; } }
+  var ov = null, frame = null, overflow = '';
+  var origin = new URL(base).origin;
+  function close() {
+    if (!ov) return;
+    ov.remove(); ov = null; frame = null;
+    document.documentElement.style.overflow = overflow;
+    btn.focus();
+  }
   btn.addEventListener('click', function () {
+    if (ov) { frame.focus(); return; }
     ov = document.createElement('div'); ov.className = 'lvb-ov';
-    var f = document.createElement('iframe');
-    f.title = label; f.allow = 'camera';
-    f.src = base + 'try/?c=' + encodeURIComponent(cid) + (pid ? '&p=' + encodeURIComponent(pid) : '');
-    ov.appendChild(f);
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', label);
+    frame = document.createElement('iframe');
+    frame.title = label; frame.allow = 'camera';
+    frame.src = base + 'try/?c=' + encodeURIComponent(cid) + (pid ? '&p=' + encodeURIComponent(pid) : '');
+    ov.appendChild(frame);
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     document.body.appendChild(ov);
+    overflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
+    frame.focus();
   });
-  window.addEventListener('message', function (e) { if (e.data === 'livinai-try-close') close(); });
+  window.addEventListener('message', function (e) { if (e.source === frame?.contentWindow && e.origin === origin && e.data === 'livinai-try-close') close(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 
   var host = target && document.querySelector(target);

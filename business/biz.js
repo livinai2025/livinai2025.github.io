@@ -5,18 +5,32 @@
   const API = (local && qs.get('api')) || 'https://ai-interior-design-g5oc.onrender.com';
   const GOOGLE_CLIENT_ID = '365853441307-1o7tsq766fvic5b1rh7ib94u39dhlmed.apps.googleusercontent.com';
   const SITE = local ? `${location.origin}/business/` : 'https://livinai.app/business/';
+  const TEAM_PLAN = {
+    currency: 'USD', seatsIncluded: 3, maxSeats: 200, trialDays: 14,
+    trialCredits: 10, monthlyCredits: 100, creditsPerExtraSeat: 25,
+    prices: { month: { team: 5900, seat: 1500 }, year: { team: 58800, seat: 14400 } },
+  };
+  const money = (cents, currency = TEAM_PLAN.currency) => new Intl.NumberFormat('en-US', {
+    style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0,
+  }).format(cents / 100);
 
+  const memory = new Map();
   const store = {
-    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* private mode */ } },
+    get(k) { if (memory.has(k)) return memory.get(k); try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) {
+      try {
+        if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+        memory.delete(k);
+      } catch { memory.set(k, v); }
+    },
   };
 
-  async function call(path, { method = 'GET', body, base = '/api/business' } = {}) {
+  async function call(path, { method = 'GET', body, base = '/api/business', auth = true } = {}) {
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
     const ut = store.get('lvb_user'), vt = store.get('lvb_visitor');
-    if (ut) headers.Authorization = `Bearer ${ut}`;
-    if (vt) headers['X-Biz-Visitor'] = vt;
+    if (auth && ut) headers.Authorization = `Bearer ${ut}`;
+    if (auth && vt) headers['X-Biz-Visitor'] = vt;
     let res;
     try {
       res = await fetch(API + base + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
@@ -38,14 +52,17 @@
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        const s = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
-        const ctx = c.getContext('2d');
-        if (!png) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
-        ctx.drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL(png ? 'image/png' : 'image/jpeg', 0.9));
+        try {
+          const s = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.naturalWidth * s));
+          c.height = Math.max(1, Math.round(img.naturalHeight * s));
+          const ctx = c.getContext('2d');
+          if (!png) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL(png ? 'image/png' : 'image/jpeg', 0.9));
+        } catch { reject(new Error('We could not prepare that photo. Try a smaller image.')); }
+        finally { URL.revokeObjectURL(url); }
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('We could not open that photo. Try a JPG or PNG.')); };
       img.src = url;
@@ -54,7 +71,9 @@
 
   /** An image already on the page (a sample cut-out) as a PNG data URL. */
   async function urlToDataUrl(src) {
-    const blob = await (await fetch(src)).blob();
+    const response = await fetch(src);
+    if (!response.ok) throw new Error('The sample image could not load. Try again.');
+    const blob = await response.blob();
     return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(blob); });
   }
 
@@ -67,7 +86,7 @@
       s.onload = resolve; s.onerror = () => reject(new Error('Google sign-in could not load.'));
       document.head.appendChild(s);
     });
-    return gisLoading;
+    return gisLoading.catch(error => { gisLoading = null; throw error; });
   }
 
   /** Render a "Sign in with Google" button; resolves the account once signed in. */
@@ -80,6 +99,7 @@
           const auth = await call('/social', { method: 'POST', base: '/api/auth', body: { provider: 'google', identityToken: credential } });
           store.set('lvb_user', auth.accessToken);
           const acct = await call('/claim', { method: 'POST' });
+          if (!acct.visitor) store.set('lvb_visitor', null);
           onDone?.(acct);
         } catch (e) { onError?.(e); }
       },
@@ -90,7 +110,7 @@
   function signOut() { store.set('lvb_user', null); store.set('lvb_visitor', null); }
 
   window.Biz = {
-    API, SITE, store, call, fileToDataUrl, urlToDataUrl, renderGoogleButton, signOut,
+    API, SITE, TEAM_PLAN, money, store, call, fileToDataUrl, urlToDataUrl, renderGoogleButton, signOut,
     hasSession: () => Boolean(store.get('lvb_user') || store.get('lvb_visitor')),
     me: () => call('/me'),
     session: (d) => call('/session', { method: 'POST', body: d }).then((r) => { store.set('lvb_visitor', r.visitorToken); return r; }),

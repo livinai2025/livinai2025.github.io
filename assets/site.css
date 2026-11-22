@@ -31,8 +31,8 @@ button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:8px}
 .wrap{width:min(var(--wrap),calc(100% - 40px));margin-inline:auto}
 .wrap.narrow{--wrap:820px}
-.skip{position:fixed;left:12px;top:12px;z-index:100;background:var(--ink);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;transform:translateY(-160%);transition:transform .2s}
-.skip:focus{transform:none}
+.skip{position:fixed;left:12px;top:12px;z-index:100;background:var(--ink);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;clip-path:inset(50%)}
+.skip:focus{clip-path:none}
 ul.clean{list-style:none;margin:0;padding:0}
 [hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

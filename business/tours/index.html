@@ -146,7 +146,7 @@ select.mini{padding:0 8px}
       <div><span class="eyebrow">Livinai for Business</span><h1>3D tours</h1></div>
       <div class="who" id="who" hidden><span id="whoEmail"></span><button class="mini" id="signOut" type="button">Sign out</button></div>
     </div>
-    <p class="lede" style="margin:-12px 0 24px">Share any 3D walkthrough from the Livinai app as a link. Buyers and clients open it in their browser and walk through the home, no app needed.</p>
+    <p class="lede" style="margin:-12px 0 24px">Share a finished walkthrough from the Livinai app. Buyers and clients can explore it in their browser.</p>
     <div id="view" aria-live="polite"><div class="spin" role="status" aria-label="Loading"></div></div>
   </div>
 </main>
@@ -166,7 +166,7 @@ select.mini{padding:0 8px}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js"></script>
+<script src="/business/biz.js?v=team-2"></script>
 <script>
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
@@ -190,13 +190,13 @@ select.mini{padding:0 8px}
       .catch(() => { $('#gBtn').innerHTML = '<p class="note">Google sign-in could not load. Refresh the page.</p>'; });
   }
 
-  function card(p) {
+  function card(p, canPublish) {
     const link = p.publicUrl;
     const meta = [p.roomCount ? `${p.roomCount} room${p.roomCount === 1 ? '' : 's'}` : '', p.areaMeters ? `${Math.round(p.areaMeters)} m²` : '', link ? `${p.publicViews || 0} view${p.publicViews === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
     let body;
     if (p.access !== 'owner') body = '<p class="muted" style="font-size:.9rem">Shared with you. Only the owner can make a public link.</p>';
     else if (!p.has3d) body = '<p class="note" style="font-size:.88rem">Open this plan\'s 3D walkthrough in the Livinai app once, then come back to share it.</p>';
-    else if (!link) body = `<div class="acts"><button class="btn btn-primary btn-sm" data-on="${esc(p.id)}" type="button">Create public link</button></div>`;
+    else if (!link) body = canPublish ? `<div class="acts"><button class="btn btn-primary btn-sm" data-on="${esc(p.id)}" type="button">Create public link</button></div>` : '<p class="muted">Choose Pro or Team to publish this tour.</p>';
     else body = `<span class="badge">Public</span>
       <div class="linkbox"><input readonly value="${esc(link)}" aria-label="Public link"><button class="mini" data-copy="${esc(link)}" type="button">Copy</button></div>
       <div class="acts" style="margin-top:10px"><a class="mini" style="display:inline-flex;align-items:center;text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Open tour</a><button class="mini" data-embed="${esc(p.id)}" type="button">Embed on a website</button><button class="mini danger" data-off="${esc(p.id)}" type="button">Turn off</button></div>
@@ -208,13 +208,11 @@ select.mini{padding:0 8px}
   function render() {
     $('#who').hidden = false; $('#whoEmail').textContent = S.me?.user?.email || '';
     const pro = S.me?.user?.subscribed;
-    const own = S.plans.filter((p) => p.access === 'owner');
     view.innerHTML = `
       ${pro ? '' : '<p class="note" style="margin-bottom:16px">Public 3D tour links are part of Livinai Pro and the Team plan. <a href="/business/#pricing">See plans</a></p>'}
-      ${S.plans.length ? `<div class="tours">${S.plans.map(card).join('')}</div>`
+      ${S.plans.length ? `<div class="tours">${S.plans.map(p => card(p, pro)).join('')}</div>`
         : `<section class="card panel"><div class="center"><h2>No 3D plans yet</h2><p class="muted">Draw a floor plan, or upload a photo of one, in the Livinai app's 3D Walkthrough. It appears here.</p>
-          <div class="row" style="justify-content:center"><a class="btn btn-secondary btn-sm" href="${Biz.stores.ios}" rel="noopener">App Store</a><a class="btn btn-secondary btn-sm" href="${Biz.stores.android}" rel="noopener">Google Play</a></div></div></section>`}
-      ${own.length && !own.some((p) => p.has3d) ? '' : ''}`;
+          <div class="row" style="justify-content:center"><a class="btn btn-secondary btn-sm" href="${Biz.stores.ios}" rel="noopener">App Store</a><a class="btn btn-secondary btn-sm" href="${Biz.stores.android}" rel="noopener">Google Play</a></div></div></section>`}`;
   }
 
   view.addEventListener('click', async (e) => {

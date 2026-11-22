@@ -155,13 +155,15 @@ select.mini{padding:0 8px}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js"></script>
+<script src="/business/biz.js?v=team-2"></script>
 <script>
 (() => {
-  /* Prices shown before checkout. Paddle shows the final amount, in the buyer's currency, with tax. */
-  const PRICE = { month: { team: 99, seat: 25 }, year: { team: 948, seat: 300 } };
-  const INCLUDED = 3;
-  const TRIAL = 14;
+  const plan = () => S.data?.billing?.plan || Biz.TEAM_PLAN;
+  const included = () => plan().seatsIncluded;
+  const maxSeats = () => plan().maxSeats;
+  const trialDays = () => plan().trialDays;
+  const discount = () => Math.round(100 * (1 - plan().prices.year.team / (12 * plan().prices.month.team)));
+  const checkoutAvailable = d => Boolean(d.billing?.ready && d.billing?.plan && (d.billing.environment === 'production' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'));
   /** A team gets one free trial. */
   const trialOn = () => !S.data?.team?.trialUsed;
 
@@ -170,11 +172,11 @@ select.mini{padding:0 8px}
   const view = $('#view');
   const qs = new URLSearchParams(location.search);
   let inviteToken = qs.get('invite') || '';
-  const S = { data: null, tab: qs.get('tab') || 'overview', cycle: qs.get('cycle') === 'month' ? 'month' : 'year', seats: INCLUDED };
+  const S = { data: null, tab: qs.get('tab') || 'overview', cycle: qs.get('cycle') === 'month' ? 'month' : 'year', seats: Biz.TEAM_PLAN.seatsIncluded, name: '' };
 
   let toastT;
   function say(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200); }
-  const money = (n) => '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const money = (cents) => Biz.money(cents, plan().currency);
   const date = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   const team = (path, opts) => Biz.call('/team' + path, opts);
   const ICON = '<svg><use href="#i-check"/></svg>';
@@ -193,7 +195,7 @@ select.mini{padding:0 8px}
       <section class="card panel"><div class="center">
         <span class="eyebrow">${inviteToken ? 'You are invited' : 'Sign in'}</span>
         <h2 style="font-family:var(--serif);font-weight:400;font-size:2rem">${inviteToken ? 'Join your team on Livinai' : 'Sign in to your team'}</h2>
-        <p class="muted">${inviteToken ? 'Sign in with the Google account the invitation was sent to. Your seat gives you Livinai Pro in the app and on the website.' : 'Use the same Google account as the Livinai app. New here? Signing in creates your account.'}</p>
+        <p class="muted">${inviteToken ? 'Sign in with the Google account the invitation was sent to. Your seat gives you access to your team’s workspace.' : 'Use the same Google account as the Livinai app. New here? Signing in creates your account.'}</p>
         <div class="gbox" id="gBtn"></div>
         <p class="muted" style="font-size:.85rem">By continuing you agree to our <a href="/terms/">terms</a> and <a href="/privacy/">privacy policy</a>.</p>
       </div></section>`;
@@ -203,56 +205,56 @@ select.mini{padding:0 8px}
 
   /* ───── no team yet ───── */
   function priceLines() {
-    const p = PRICE[S.cycle], extra = Math.max(0, S.seats - INCLUDED);
+    const p = plan().prices[S.cycle], extra = Math.max(0, S.seats - included());
     const total = p.team + extra * p.seat;
-    const per = S.cycle === 'year' ? `${money(total / 12)} a month, billed ${money(total)} a year` : `${money(total)} a month`;
+    const per = S.cycle === 'year' ? `${money(total)} billed yearly` : `${money(total)} billed monthly`;
     return `
-      <div class="l"><span>Team plan, ${INCLUDED} seats</span><span>${money(p.team)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>
+      <div class="l"><span>Team plan, ${included()} seats</span><span>${money(p.team)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>
       ${extra ? `<div class="l"><span>${extra} extra seat${extra === 1 ? '' : 's'} × ${money(p.seat)}</span><span>${money(extra * p.seat)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>` : ''}
       <div class="l tot"><span>Total</span><span>${per}</span></div>
-      <small>${trialOn() ? `Free for ${TRIAL} days, then this amount. Cancel before day ${TRIAL + 1} and you pay nothing. ` : ''}Tax is added at checkout where it applies. Paddle sends your invoices. Cancel any time; you keep access until the end of the period you paid for.</small>`;
+      <small>${checkoutAvailable(S.data) && trialOn() ? `Free for ${trialDays()} days with ${plan().trialCredits} shared image credits. Cancel before the trial ends to avoid being charged. ` : ''}Paddle shows applicable tax at checkout. Manage invoices and cancellation from your Team account.</small>`;
   }
 
   function buyPanel(d) {
-    const billingOff = !d.billing?.ready;
+    const billingOff = !checkoutAvailable(d);
     const isOwner = !d.member || d.member.role === 'owner';
     if (d.team && !isOwner) {
-      return `<section class="card panel"><h2>Your team's plan is not active</h2><p class="sub">Ask your team owner to start or renew the Team plan. Until then, your seat does not include Pro.</p></section>`;
+      return `<section class="card panel"><h2>Your team's plan is not active</h2><p class="sub">Ask your team owner to start or renew the plan.</p></section>`;
     }
     return `
       <section class="card panel" id="buy">
-        <h2>${d.team ? 'Start your Team plan' : 'Create your team'}${trialOn() ? ` <span class="badge">${TRIAL} days free</span>` : ''}</h2>
-        <p class="sub">Everything in Livinai Pro for every seat, plus a shared library, your logo on catalogues and a usage dashboard.</p>
+        <h2>${d.team ? 'Start your Team plan' : 'Create your team'}${trialOn() && !billingOff ? ` <span class="badge">${trialDays()} days free</span>` : ''}</h2>
+        <p class="sub">Create and share product scenes, catalogues and 3D tours from one workspace.</p>
         <div class="buy">
           <div style="display:grid;gap:18px">
-            ${d.team ? '' : `<div class="f"><label for="tName">Team or company name</label><input id="tName" maxlength="120" autocomplete="organization" placeholder="e.g. Oak & Co Interiors"></div>`}
+            ${d.team ? '' : `<div class="f"><label for="tName">Team or company name</label><input id="tName" maxlength="120" autocomplete="organization" placeholder="e.g. Oak & Co Interiors" value="${esc(S.name)}"></div>`}
             <div class="f"><label>Billing</label>
               <div class="seg" role="group" aria-label="Billing period">
-                <button type="button" data-cycle="year" aria-pressed="${S.cycle === 'year'}">Yearly <small>Save 20%</small></button>
+                <button type="button" data-cycle="year" aria-pressed="${S.cycle === 'year'}">Yearly <small>Save ${discount()}%</small></button>
                 <button type="button" data-cycle="month" aria-pressed="${S.cycle === 'month'}">Monthly</button>
               </div></div>
             <div class="f"><label id="seatLbl">Seats</label>
               <div class="row"><div class="step" role="group" aria-labelledby="seatLbl">
-                <button type="button" data-seat="-1" aria-label="One seat fewer" ${S.seats <= Math.max(INCLUDED, d.seatsUsed || 0) ? 'disabled' : ''}>−</button>
+                <button type="button" data-seat="-1" aria-label="One seat fewer" ${S.seats <= Math.max(included(), d.seatsUsed || 0) ? 'disabled' : ''}>−</button>
                 <output id="seatOut" aria-live="polite">${S.seats}</output>
-                <button type="button" data-seat="1" aria-label="One seat more" ${S.seats >= 200 ? 'disabled' : ''}>+</button>
-              </div><small class="muted">${INCLUDED} included, ${money(PRICE[S.cycle].seat / (S.cycle === 'year' ? 12 : 1))} a month for each extra seat</small></div></div>
+                <button type="button" data-seat="1" aria-label="One seat more" ${S.seats >= maxSeats() ? 'disabled' : ''}>+</button>
+              </div><small class="muted">${included()} included, ${money(plan().prices[S.cycle].seat)} per extra seat/${S.cycle === 'year' ? 'year' : 'month'}</small></div></div>
             <ul class="ticks">
-              <li>${ICON}Livinai Pro for every seat: up to 20 designs a day each, in the app and on the web</li>
+              <li>${ICON}${plan().monthlyCredits + Math.max(0, S.seats - included()) * plan().creditsPerExtraSeat} shared image credits each month</li>
               <li>${ICON}Shared product library and catalogues for the whole team</li>
               <li>${ICON}Your logo on catalogues and the "See it in your room" window</li>
-              <li>${ICON}Shopper try-ons on your website and catalogues</li>
+              <li>${ICON}Shopper room previews on your website and catalogues</li>
               <li>${ICON}Public 3D tour links for your listings and projects</li>
-              <li>${ICON}Brand colour, white label, usage dashboard and bulk upload</li>
+              <li>${ICON}Brand colour, white label and usage dashboard</li>
             </ul>
           </div>
           <div class="sum" id="sum">${priceLines()}</div>
         </div>
         <div class="row" style="margin-top:22px">
           ${billingOff
-            ? `<p class="note">Online checkout is being switched on. <a href="/business/#demo">Book a demo</a> and we will start your team with you.</p>`
-            : `<button class="btn btn-primary" id="payBtn" type="button">${trialOn() ? `Start ${TRIAL}-day free trial` : 'Continue to secure payment'} <svg class="arr"><use href="#i-arrow"/></svg></button>
-               <small class="muted">Card, PayPal, Apple Pay or Google Pay, through Paddle.</small>`}
+            ? `<p class="note">Online checkout is currently unavailable. <a href="/business/#demo">Contact us about Team</a>.</p>`
+            : `<button class="btn btn-primary" id="payBtn" type="button">${trialOn() ? `Start ${trialDays()}-day free trial` : 'Continue to secure payment'} <svg class="arr"><use href="#i-arrow"/></svg></button>
+               <small class="muted">Payment methods are shown in Paddle checkout.</small>`}
         </div>
       </section>`;
   }
@@ -260,16 +262,17 @@ select.mini{padding:0 8px}
   function noTeam(d) {
     $('#title').textContent = 'Team account';
     view.innerHTML = `
-      ${d.pendingInvite ? `<section class="card panel"><h2>You are invited to ${esc(d.pendingInvite.teamName)}</h2><p class="sub">Join to share their products and catalogues and get Pro through their plan.</p><button class="btn btn-primary" id="joinBtn" type="button">Join ${esc(d.pendingInvite.teamName)}</button></section>` : ''}
+      ${d.pendingInvite ? `<section class="card panel"><h2>You are invited to ${esc(d.pendingInvite.teamName)}</h2><p class="sub">Join their workspace. Your existing studio products and catalogues will move to the team.</p><button class="btn btn-primary" id="joinBtn" type="button">Join ${esc(d.pendingInvite.teamName)}</button></section>` : ''}
       ${buyPanel(d)}`;
     wireBuy(d);
     $('#joinBtn')?.addEventListener('click', () => doJoin(''));
   }
 
   function wireBuy(d) {
+    $('#tName')?.addEventListener('input', event => { S.name = event.target.value; });
     view.querySelectorAll('[data-cycle]').forEach((b) => b.addEventListener('click', () => { S.cycle = b.dataset.cycle; render(); }));
-    view.querySelectorAll('[data-seat]').forEach((b) => b.addEventListener('click', () => { S.seats = Math.min(200, Math.max(INCLUDED, (d.seatsUsed || 0), S.seats + Number(b.dataset.seat))); render(); }));
-    $('#payBtn')?.addEventListener('click', () => startCheckout(d));
+    view.querySelectorAll('[data-seat]').forEach((b) => b.addEventListener('click', () => { S.seats = Math.min(maxSeats(), Math.max(included(), (d.seatsUsed || 0), S.seats + Number(b.dataset.seat))); render(); }));
+    $('#payBtn')?.addEventListener('click', startCheckout);
   }
 
   /* ───── Paddle checkout ───── */
@@ -288,13 +291,20 @@ select.mini{padding:0 8px}
       s.onerror = () => reject(new Error('The payment window could not load. Check your connection and try again.'));
       document.head.appendChild(s);
     });
-    return paddleReady;
+    return paddleReady.catch(error => { paddleReady = null; throw error; });
   }
 
+  let checkoutPending = false;
   async function onPaddleEvent(e) {
-    if (e?.name !== 'checkout.completed') return;
+    if (e?.name === 'checkout.closed') {
+      checkoutPending = false;
+      if (S.data && !S.data.team?.live) render();
+      return;
+    }
+    if (e?.name !== 'checkout.completed' || !checkoutPending) return;
+    checkoutPending = false;
     const tx = e.data?.transaction_id;
-    view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Payment received</h2><p class="muted">Setting up your team. This takes a few seconds.</p></div></section>';
+    view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Checkout complete</h2><p class="muted">We’re waiting for Paddle to confirm your plan.</p></div></section>';
     for (let i = 0; i < 20; i += 1) {
       try {
         const d = await team('/sync', { method: 'POST', body: { transactionId: tx } });
@@ -302,28 +312,29 @@ select.mini{padding:0 8px}
       } catch { /* keep waiting for the webhook */ }
       await new Promise((r) => setTimeout(r, 2500));
     }
-    say('Payment received. Your team will switch on in a minute; refresh this page.');
+    say('Your checkout is complete. Refresh this page to check activation.');
     load();
   }
 
-  async function startCheckout(d) {
+  async function startCheckout() {
+    if (checkoutPending) return;
     const btn = $('#payBtn'); btn.disabled = true;
     try {
-      if (!d.team) {
+      if (!S.data.team) {
         const name = $('#tName')?.value.trim();
         if (!name) { $('#tName').focus(); say('Please enter your team or company name.'); return; }
         S.data = await team('', { method: 'POST', body: { name } });
       }
       const c = await team('/checkout', { method: 'POST', body: { cycle: S.cycle, seats: S.seats } });
       await loadPaddle(c);
+      checkoutPending = true;
       window.Paddle.Checkout.open({
-        items: c.items,
+        transactionId: c.transactionId,
         customer: { email: c.customer.email },
-        customData: c.customData,
         settings: { displayMode: 'overlay', theme: 'light', locale: 'en', allowLogout: false },
       });
-    } catch (e) { say(e.message); }
-    finally { if (btn.isConnected) btn.disabled = false; }
+    } catch (e) { checkoutPending = false; say(e.message); }
+    finally { if (btn.isConnected && !checkoutPending) btn.disabled = false; }
   }
 
   /* ───── team ───── */
@@ -355,46 +366,66 @@ select.mini{padding:0 8px}
 
   function overviewTab(body, d, owner) {
     const t = d.team;
-    if (!t.live) { body.innerHTML = buyPanel(d); S.seats = Math.max(S.seats, d.seatsUsed || 0); wireBuy(d); return; }
+    if (!t.live) {
+      S.seats = Math.max(S.seats, d.seatsUsed || 0);
+      body.innerHTML = (t.status === 'paused' ? '<section class="card panel"><h2>Subscription paused</h2><p class="sub">The team owner can resume this subscription from Manage billing.</p></section>' : buyPanel(d))
+        + (owner && t.hasBilling ? '<section class="card panel"><button class="btn btn-secondary" id="portalBtn" type="button">Manage billing and invoices</button></section>' : '');
+      wireBuy(d);
+      wirePortal();
+      return;
+    }
     body.innerHTML = `
       <section class="card panel">
         <div class="row" style="justify-content:space-between"><h2>Team plan ${statusBadge(t)}</h2></div>
         <p class="sub">${t.cycle === 'month' ? 'Billed monthly' : 'Billed yearly'}${t.currentPeriodEnd ? ` · ${t.cancelAt ? 'Access until' : t.status === 'trialing' ? 'First payment on' : 'Renews on'} ${date(t.cancelAt || t.currentPeriodEnd)}` : ''}</p>
         <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
           <div class="kpi"><b>${d.seatsUsed}/${t.seats}</b><span>Seats used</span></div>
-          <div class="kpi"><b>${d.members.filter((m) => m.status === 'active').length}</b><span>People with Pro</span></div>
-          <div class="kpi"><b>${d.members.filter((m) => m.status === 'invited').length}</b><span>Waiting to join</span></div>
+          <div class="kpi"><b>${d.members.filter((m) => m.status === 'active').length}</b><span>Active members</span></div>
+          <div class="kpi"><b>${d.credits ? `${d.credits.remaining}/${d.credits.limit}` : '—'}</b><span>Image credits left</span></div>
         </div>
+        ${d.credits?.resetsAt ? `<p class="sub" style="margin:12px 0 0">${t.status === 'trialing' ? 'Trial ends' : 'Credits reset'} ${new Date(d.credits.resetsAt).toLocaleDateString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' })} (UTC).</p>` : ''}
         ${t.status === 'past_due' ? '<p class="note" style="margin-top:16px">Your last payment did not go through. Update your card in Manage billing to keep your team\'s access.</p>' : ''}
         ${owner ? `<div class="row" style="margin-top:20px">
             <button class="btn btn-secondary" id="portalBtn" type="button">Manage billing and invoices <svg class="arr"><use href="#i-arrow"/></svg></button>
           </div>` : '<p class="muted" style="margin-top:16px">Only the team owner can change billing.</p>'}
       </section>
-      ${owner && !t.cancelAt ? `<section class="card panel">
-        <h2>Seats</h2><p class="sub">${INCLUDED} seats are included. Each extra seat is ${money(PRICE[t.cycle || 'year'].seat)} a ${t.cycle === 'month' ? 'month' : 'year'}. Changes are prorated and charged now.</p>
+      ${owner && !t.cancelAt && t.status !== 'past_due' ? `<section class="card panel">
+        <h2>Seats</h2><p class="sub">${included()} seats are included. Extra seats add ${plan().creditsPerExtraSeat} monthly credits each. ${t.status === 'trialing' ? 'Your new seat total applies at the end of the trial.' : 'Changes are prorated at your subscription’s rate.'}</p>
         <div class="row"><div class="step" role="group" aria-label="Seats">
           <button type="button" id="sMinus" aria-label="One seat fewer">−</button><output id="sOut">${t.seats}</output><button type="button" id="sPlus" aria-label="One seat more">+</button>
         </div><button class="btn btn-primary btn-sm" id="sSave" type="button" disabled>Update seats</button></div>
       </section>` : ''}
-      ${d.member.role !== 'owner' ? `<section class="card panel"><h2>Leave team</h2><p class="sub">You lose Pro from this team. What you made stays with the team.</p><button class="mini danger" id="leaveBtn" type="button">Leave ${esc(t.name)}</button></section>` : ''}`;
-    $('#portalBtn')?.addEventListener('click', async (e) => {
-      e.target.disabled = true;
-      try { const r = await team('/portal', { method: 'POST' }); location.href = r.url; } catch (err) { say(err.message); e.target.disabled = false; }
-    });
+      ${d.member.role !== 'owner' ? `<section class="card panel"><h2>Leave team</h2><p class="sub">You’ll lose access to this workspace. Its products and catalogues stay with the team.</p><button class="mini danger" id="leaveBtn" type="button">Leave ${esc(t.name)}</button></section>` : ''}`;
+    wirePortal();
     let seats = t.seats;
-    const upd = () => { $('#sOut').textContent = seats; $('#sSave').disabled = seats === t.seats; $('#sMinus').disabled = seats <= Math.max(INCLUDED, d.seatsUsed); };
+    const upd = () => {
+      $('#sOut').textContent = seats;
+      $('#sSave').disabled = seats === t.seats;
+      $('#sMinus').disabled = seats <= Math.max(included(), d.seatsUsed);
+      $('#sPlus').disabled = seats >= maxSeats();
+    };
     if ($('#sOut')) {
       upd();
       $('#sMinus').addEventListener('click', () => { seats -= 1; upd(); });
-      $('#sPlus').addEventListener('click', () => { seats = Math.min(200, seats + 1); upd(); });
+      $('#sPlus').addEventListener('click', () => { seats = Math.min(maxSeats(), seats + 1); upd(); });
       $('#sSave').addEventListener('click', async (e) => {
-        e.target.disabled = true;
+        if (!confirm(`Change your subscription to ${seats} seats?`)) return;
+        e.currentTarget.disabled = true;
         try { S.data = await team('/seats', { method: 'PATCH', body: { seats } }); render(); say(`Your team now has ${S.data.team.seats} seats.`); } catch (err) { say(err.message); upd(); }
       });
     }
     $('#leaveBtn')?.addEventListener('click', async () => {
       if (!confirm(`Leave ${t.name}?`)) return;
       try { S.data = await team('/leave', { method: 'POST' }); render(); say('You left the team.'); } catch (err) { say(err.message); }
+    });
+  }
+
+  function wirePortal() {
+    $('#portalBtn')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try { const r = await team('/portal', { method: 'POST' }); location.href = r.url; }
+      catch (error) { say(error.message); button.disabled = false; }
     });
   }
 
@@ -537,7 +568,10 @@ select.mini{padding:0 8px}
       S.data = await team('/join', { method: 'POST', body: { token } });
       inviteToken = ''; history.replaceState(null, '', location.pathname);
       S.tab = 'overview'; render(); say(`Welcome to ${S.data.team.name}.`);
-    } catch (e) { say(e.message); if (token) { inviteToken = ''; history.replaceState(null, '', location.pathname); } load(); }
+    } catch (e) {
+      view.innerHTML = `<section class="card panel"><h2>Could not join the team</h2><p class="sub">${esc(e.message)}</p><button class="btn btn-secondary" id="switchAccount">Switch Google account</button></section>`;
+      $('#switchAccount').addEventListener('click', () => { Biz.signOut(); S.data = null; render(); });
+    }
   }
 
   function render() {
@@ -549,10 +583,20 @@ select.mini{padding:0 8px}
   }
 
   async function load() {
-    if (!Biz.store.get('lvb_user')) { S.data = null; return render(); }
+    const session = Biz.store.get('lvb_user');
+    if (!session) { S.data = null; return render(); }
     try {
       if (inviteToken) return doJoin(inviteToken);
-      S.data = await team('');
+      const data = await team('');
+      if (session !== Biz.store.get('lvb_user')) return;
+      S.data = data;
+      if (data.checkoutStarted && data.member?.role === 'owner') {
+        try {
+          const synced = await team('/sync', { method: 'POST' });
+          if (session !== Biz.store.get('lvb_user')) return;
+          S.data = synced;
+        } catch { /* The checkout can also be confirmed by webhook. */ }
+      }
       if (qs.get('plan') === 'team' && !S.data.team) S.tab = 'overview';
       render();
     } catch (e) {

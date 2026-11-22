@@ -55,50 +55,77 @@ small.note{color:var(--faint);font-size:.78rem}
     <div class="stage" id="stage">
       <div class="ph" id="ph"><div><b>Take or upload a photo of your room</b>We'll show the piece in it, in about a minute.</div></div>
     </div>
-    <p class="err" id="err" hidden></p>
+    <p class="err" id="err" role="alert" hidden></p>
   </main>
   <footer>
-    <small class="note">Your photo is only used to make this picture.<span id="powered"> Powered by Livinai.</span></small>
-    <label class="btn p" id="upBtn" tabindex="0">Upload a room photo<input type="file" accept="image/jpeg,image/png,image/webp" id="file" hidden></label>
+    <small class="note">We process your photo to make this preview.<span id="powered"> Powered by Livinai.</span></small>
+    <button class="btn p" id="upBtn" type="button" disabled>Upload a room photo</button>
+    <input type="file" accept="image/jpeg,image/png,image/webp" id="file" hidden>
   </footer>
 </div>
-<script src="../biz.js"></script>
+<script src="../biz.js?v=team-2"></script>
 <script>
 (async () => {
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const qs = new URLSearchParams(location.search), cid = qs.get('c');
   const err = m => { $('#err').textContent = m; $('#err').hidden = !m; };
-  $('#close').onclick = () => { if (parent !== window) parent.postMessage('livinai-try-close', '*'); else history.back(); };
-  let cat, cur;
-  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid) + '?count=0')).catalogue; }
+  const close = () => { if (parent !== window) parent.postMessage('livinai-try-close', '*'); else location.href = cid ? '../c/?id=' + encodeURIComponent(cid) : '../'; };
+  $('#close').onclick = close;
+  addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+  let cat, cur, busy = false;
+  try {
+    if (!cid) throw Object.assign(new Error('This room preview link is incomplete.'), { status: 404 });
+    cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid) + '?count=0', { auth: false })).catalogue;
+  }
   catch (e) { err(e.status === 404 ? 'This catalogue could not be found.' : e.message); $('#upBtn').hidden = true; return; }
   if (/^#[0-9a-f]{6}$/i.test(cat.brandColor || '')) document.documentElement.style.setProperty('--green', cat.brandColor);
   if (cat.hideBranding) $('#powered').hidden = true;
   if (cat.logoUrl) { const im = new Image(); im.src = cat.logoUrl; im.alt = cat.brand || ''; $('header b').prepend(im); }
-  if (!cat.tryonEnabled) { $('#ph').innerHTML = '<div><b>Room previews are coming soon</b>This store has not switched them on yet.</div>'; $('#upBtn').hidden = true; }
+  if (!cat.products.length || !cat.tryonEnabled) {
+    $('#ph').innerHTML = '<div><b>Room previews are unavailable</b>Check the catalogue for available products.</div>';
+    $('#upBtn').hidden = true;
+    return;
+  }
   cur = cat.products.find(p => p.id === qs.get('p')) || cat.products[0];
   const renderPick = () => {
     $('#pick').innerHTML = cat.products.map(p => `<button data-id="${esc(p.id)}" aria-pressed="${p === cur}" title="${esc(p.name)}"><img src="${esc(p.cutoutUrl)}" alt=""><small>${esc(p.name)}</small></button>`).join('');
   };
   renderPick();
-  $('#pick').onclick = e => { const b = e.target.closest('button'); if (b) { cur = cat.products.find(p => p.id === b.dataset.id); renderPick(); } };
-  $('#upBtn').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file').click(); } };
+  $('#pick').onclick = e => {
+    const button = e.target.closest('button');
+    if (busy || !button) return;
+    cur = cat.products.find(p => p.id === button.dataset.id);
+    for (const item of $('#pick').children) item.setAttribute('aria-pressed', item === button);
+  };
+  $('#upBtn').onclick = () => $('#file').click();
+  $('#upBtn').disabled = false;
   $('#file').onchange = async () => {
-    const f = $('#file').files[0]; $('#file').value = ''; if (!f) return;
+    const f = $('#file').files[0]; $('#file').value = ''; if (!f || busy) return;
+    const product = cur;
     err('');
-    let roomImage; try { roomImage = await Biz.fileToDataUrl(f, { maxSide: 1600 }); } catch (e) { return err(e.message); }
     const st = $('#stage');
-    st.innerHTML = `<img src="${roomImage}" alt="Your room"><div class="ph load"><div><div class="spin"></div><b>Placing ${esc(cur.name)}</b>This takes about 30 to 60 seconds.</div></div>`;
-    $('#upBtn').style.pointerEvents = 'none'; $('#upBtn').style.opacity = .6;
+    busy = true;
+    $('#upBtn').disabled = true;
+    for (const button of $('#pick').children) button.disabled = true;
+    st.setAttribute('aria-busy', 'true');
     try {
-      const d = await Biz.call(`/catalogues/${encodeURIComponent(cat.id)}/tryon`, { method: 'POST', body: { productId: cur.id, roomImage } });
-      st.innerHTML = `<img class="after" src="${esc(d.imageUrl)}" alt="Your room with ${esc(cur.name)}"><img class="before" src="${esc(d.beforeUrl)}" alt="Your room before"><span class="lbl l">Before</span><span class="lbl r">With ${esc(cur.name)}</span><div class="line"></div><input type="range" min="0" max="100" value="50" aria-label="Compare before and after">`;
+      const roomImage = await Biz.fileToDataUrl(f, { maxSide: 1600 });
+      st.innerHTML = `<img src="${roomImage}" alt="Your room"><div class="ph load" role="status"><div><div class="spin"></div><b>Placing ${esc(product.name)}</b>This usually takes about a minute.</div></div>`;
+      const d = await Biz.call(`/catalogues/${encodeURIComponent(cat.id)}/tryon`, { method: 'POST', body: { productId: product.id, roomImage }, auth: false });
+      st.style.setProperty('--pos', '50%');
+      st.innerHTML = `<img class="after" src="${esc(d.imageUrl)}" alt="Your room with ${esc(product.name)}"><img class="before" src="${esc(d.beforeUrl)}" alt="Original room"><span class="lbl l">Before</span><span class="lbl r">With ${esc(product.name)}</span><div class="line"></div><input type="range" min="0" max="100" value="50" aria-label="Compare before and after">`;
       const r = st.querySelector('input'); r.oninput = () => st.style.setProperty('--pos', r.value + '%');
       $('#upBtn').firstChild.textContent = 'Try another photo';
     } catch (e) {
-      st.innerHTML = `<div class="ph"><div><b>That didn't work</b>${esc(e.message)}</div></div>`;
-    } finally { $('#upBtn').style.pointerEvents = ''; $('#upBtn').style.opacity = ''; }
+      st.innerHTML = '<div class="ph"><div><b>Choose a room photo to try again</b></div></div>';
+      err(e.message);
+    } finally {
+      busy = false;
+      st.removeAttribute('aria-busy');
+      $('#upBtn').disabled = false;
+      for (const button of $('#pick').children) button.disabled = false;
+    }
   };
 })();
 </script>

@@ -13,12 +13,14 @@
   if (btn && menu) {
     const set = (open) => {
       menu.classList.toggle('open', open);
+      menu.inert = !open;
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     };
+    set(false);
     btn.addEventListener('click', () => set(!menu.classList.contains('open')));
     menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('open')) { set(false); btn.focus(); } });
   }
 
   // Before / after sliders

@@ -116,7 +116,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
 </main>
 <footer><div class="wrap"><span id="foot"></span><a href="https://livinai.app/business/" target="_blank" rel="noopener" id="madeWith">Made with Livinai</a></div></footer>
 
-<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true">
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="iName">
   <div class="scrim" data-close></div>
   <div class="panel">
     <button class="x" data-close aria-label="Close">×</button>
@@ -134,7 +134,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
 </div>
 <div class="tryframe" id="tryFrame" hidden><div class="scrim" data-close></div><iframe id="tryIf" title="See it in your room" allow="camera"></iframe></div>
 
-<script src="../biz.js"></script>
+<script src="../biz.js?v=team-2"></script>
 <script>
 (async () => {
   const $ = s => document.querySelector(s);
@@ -143,7 +143,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   const state = $('#state');
   if (!id) { state.textContent = 'This catalogue link is missing its id.'; return; }
   let cat;
-  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(id))).catalogue; }
+  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(id) + (qs.get('print') === '1' ? '?count=0' : ''), { auth: false })).catalogue; }
   catch (e) { state.textContent = e.status === 404 ? 'This catalogue could not be found.' : e.message; return; }
 
   document.title = `${cat.title}${cat.brand ? ' · ' + cat.brand : ''}`;
@@ -153,8 +153,10 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   $('#brandEy').textContent = cat.brand ? `${cat.brand} · Collection` : 'Collection';
   $('#title').textContent = cat.title;
   const sceneCount = cat.products.reduce((n, p) => n + p.scenes.length, 0);
-  $('#sub').textContent = `${cat.products.length} ${cat.products.length === 1 ? 'piece' : 'pieces'}${sceneCount ? `, shown in ${sceneCount} styled ${sceneCount === 1 ? 'room' : 'rooms'}` : ''}. Tap a piece to see more${cat.tryonEnabled ? ' or try it in your own room' : ''}.`;
-  $('#foot').textContent = `© ${new Date().getFullYear()} ${cat.brand || ''}`.trim();
+  $('#sub').textContent = cat.products.length
+    ? `${cat.products.length} ${cat.products.length === 1 ? 'piece' : 'pieces'}${sceneCount ? ` · ${sceneCount} styled ${sceneCount === 1 ? 'scene' : 'scenes'}` : ''}. Select a piece to see details${cat.tryonEnabled ? ' or preview it in your room' : ''}.`
+    : 'There are no products in this catalogue right now.';
+  $('#foot').textContent = cat.brand ? `© ${new Date().getFullYear()} ${cat.brand}` : '';
   if (cat.website) { $('#siteBtn').href = cat.website; $('#siteBtn').hidden = false; }
   state.hidden = true; $('#hero').hidden = false; $('#grid').hidden = false;
 
@@ -168,33 +170,59 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   }).join('');
 
   const sheet = $('#sheet');
-  let cur = null;
+  let cur = null, opener = null;
   function openProduct(p) {
     cur = p;
-    const imgs = [...p.scenes.map(s => ({ src: s.imageUrl, cut: false, label: `${s.style} ${s.room}` })), { src: p.cutoutUrl, cut: true, label: 'Product' }];
+    const imgs = [...p.scenes.map(s => ({ src: s.imageUrl, cut: false, label: `${s.style} ${s.room} · AI scene` })), { src: p.photoUrl || p.cutoutUrl, cut: true, label: 'Product photo' }];
     const show = (k) => { const m = $('#gMain'); m.src = imgs[k].src; m.className = imgs[k].cut ? 'cut' : ''; m.alt = `${p.name}: ${imgs[k].label}`; [...$('#gThumbs').children].forEach((b, j) => b.setAttribute('aria-pressed', j === k)); };
     $('#gThumbs').innerHTML = imgs.map((im, k) => `<button aria-label="${esc(im.label)}"><img class="${im.cut ? 'cut' : ''}" src="${esc(im.src)}" alt=""></button>`).join('');
     [...$('#gThumbs').children].forEach((b, k) => b.onclick = () => show(k));
     show(0);
     $('#iCat').textContent = p.category || ''; $('#iName').textContent = p.name; $('#iPrice').textContent = p.price || ''; $('#iDesc').textContent = p.description || '';
     $('#iSpecs').innerHTML = [['Size', p.dims], ['Material', p.material], ['SKU', p.sku]].filter(r => r[1]).map(r => `<div><span>${r[0]}</span><b>${esc(r[1])}</b></div>`).join('')
-      + (p.colors?.length ? `<div><span>Colours</span><span class="sw">${p.colors.map(c => `<i style="background:${esc(c)}"></i>`).join('')}</span></div>` : '');
+      + (p.colors?.length ? `<div><span>Colours</span><span class="sw">${p.colors.filter(c => /^#[0-9a-f]{6}$/i.test(c)).map(c => `<i style="background:${c}"></i>`).join('')}</span></div>` : '');
     $('#buyBtn').hidden = !p.url; if (p.url) $('#buyBtn').href = p.url;
     $('#tryBtn').hidden = !cat.tryonEnabled;
     sheet.hidden = false;
+    sheet.querySelector('button[data-close]')?.focus();
   }
-  $('#grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openProduct(cat.products[+c.dataset.i]); });
-  document.addEventListener('click', e => { if (e.target.closest('[data-close]')) { sheet.hidden = true; $('#tryFrame').hidden = true; $('#tryIf').src = 'about:blank'; } });
-  addEventListener('keydown', e => { if (e.key === 'Escape') { sheet.hidden = true; $('#tryFrame').hidden = true; } });
-  $('#tryBtn').addEventListener('click', () => { $('#tryIf').src = `../try/?c=${encodeURIComponent(cat.id)}&p=${encodeURIComponent(cur.id)}`; $('#tryFrame').hidden = false; });
-  addEventListener('message', e => { if (e.data === 'livinai-try-close') { $('#tryFrame').hidden = true; } });
+  const tryFrame = $('#tryFrame'), frame = $('#tryIf');
+  function closeTry() {
+    tryFrame.hidden = true;
+    frame.removeAttribute('src');
+    $('#tryBtn').focus();
+  }
+  function closeProduct() { sheet.hidden = true; opener?.focus(); }
+  $('#grid').addEventListener('click', e => {
+    const card = e.target.closest('.card');
+    if (card) { opener = card; openProduct(cat.products[+card.dataset.i]); }
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-close]')) return;
+    if (tryFrame.contains(e.target)) closeTry();
+    else if (sheet.contains(e.target)) closeProduct();
+  });
+  addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!tryFrame.hidden) closeTry();
+    else if (!sheet.hidden) closeProduct();
+  });
+  $('#tryBtn').addEventListener('click', () => {
+    frame.src = `../try/?c=${encodeURIComponent(cat.id)}&p=${encodeURIComponent(cur.id)}`;
+    tryFrame.hidden = false;
+    frame.focus();
+  });
+  addEventListener('message', e => {
+    if (e.source === frame.contentWindow && e.origin === location.origin && e.data === 'livinai-try-close') closeTry();
+  });
 
   $('#shareBtn').addEventListener('click', async () => {
-    const url = location.href.split('&print')[0];
+    const url = new URL(location.href);
+    url.searchParams.delete('print');
     try { if (navigator.share) await navigator.share({ title: document.title, url }); else { await navigator.clipboard.writeText(url); $('#shareBtn').lastChild.textContent = 'Copied'; } } catch { /* cancelled */ }
   });
   const printNow = async () => {
-    await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    await Promise.all([...$('#grid').querySelectorAll('img')].map(im => im.decode().catch(() => {})));
     print();
   };
   $('#pdfBtn').addEventListener('click', () => { document.querySelectorAll('img[loading=lazy]').forEach(i => i.loading = 'eager'); printNow(); });
