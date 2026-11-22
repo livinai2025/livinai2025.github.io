@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /business/try/
+Disallow: /business/c/
+
+Sitemap: https://livinai.app/sitemap.xml

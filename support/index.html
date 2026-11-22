@@ -1,43 +1,163 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Official support for the Livinai AI home design app.">
-  <meta name="theme-color" content="#F7F6F2">
-  <title>Livinai Support</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support · Livinai</title>
+<meta name="description" content="Official support for the Livinai AI home design app: account, purchases, subscriptions and design help.">
+<meta name="theme-color" content="#FAF8F3">
+<link rel="canonical" href="https://livinai.app/support/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Livinai">
+<meta property="og:title" content="Livinai Support">
+<meta property="og:description" content="Help with your account, purchases, subscriptions and AI designs.">
+<meta property="og:image" content="https://livinai.app/assets/img/icon-512.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.contact{display:grid;grid-template-columns:auto 1fr auto;gap:20px 24px;align-items:center;padding:28px}
+.contact h2{font-family:var(--sans);font-size:1.15rem;font-weight:600;letter-spacing:-.01em;margin-bottom:4px}
+.contact p{color:var(--muted)}
+.contact a:not(.btn){color:var(--green)}
+@media (max-width:720px){ .contact{grid-template-columns:auto 1fr} .contact .btn{grid-column:1/-1;justify-self:start} }
+.topics{margin-top:16px}
+.topic{padding:28px;display:grid;gap:14px;align-content:start}
+.topic h2{font-family:var(--sans);font-size:1.1rem;font-weight:600;letter-spacing:-.01em}
+.topic ul{margin:0;padding-left:1.1rem;display:grid;gap:10px}
+.topic li{color:var(--muted);line-height:1.6}
+.topic strong{color:var(--ink-2);font-weight:600}
+.note{display:flex;gap:16px;align-items:flex-start;margin-top:16px;padding:22px 24px;border-radius:var(--r-md);background:var(--gold-3);border:1px solid rgba(180,135,74,.25)}
+.note svg{width:22px;height:22px;flex:none;color:#8a6430;margin-top:2px}
+.note strong{display:block;margin-bottom:2px}
+.note p{color:var(--ink-2);font-size:.95rem}
+.more{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:clamp(48px,6vw,72px)}
+.more a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 24px;text-decoration:none;transition:border-color .2s,box-shadow .2s}
+.more a:hover{border-color:var(--line-2);box-shadow:var(--sh-2)}
+.more b{display:block;font-weight:600}
+.more small{color:var(--muted);font-size:.9rem}
+.more svg{width:18px;height:18px;color:var(--green);flex:none}
+@media (max-width:720px){ .more{grid-template-columns:1fr} }
+</style>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to content</a>
-  <header class="site-header">
-    <nav class="shell nav-wrap" aria-label="Main navigation">
-      <a class="brand" href="/">Livinai</a>
-      <div class="nav-links"><a class="nav-link" href="/support/" aria-current="page">Support</a><a class="nav-link" href="/privacy/">Privacy</a></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 10l6.7 2-6.7 2L12 20.5 10.2 14l-6.7-2 6.7-2Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="brand" href="/" aria-label="Livinai home"><img src="/assets/img/wordmark.png" alt="Livinai" width="96" height="26"></a>
+    <nav class="nav" aria-label="Main">
+      <a href="/#features">Features</a>
+      <a href="/#walkthrough">3D walkthrough</a>
+      <a href="/business/">For business</a>
+      <a href="/support/" aria-current="page">Support</a>
     </nav>
-  </header>
+    <div class="hdr-cta">
+      <a class="btn btn-primary btn-sm" href="/#download">Get the app</a>
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mnav"><svg><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+  <nav class="mnav" id="mnav" aria-label="Mobile">
+    <a href="/#features">Features <svg><use href="#i-chev"/></svg></a>
+    <a href="/#walkthrough">3D walkthrough <svg><use href="#i-chev"/></svg></a>
+    <a href="/business/">For business <svg><use href="#i-chev"/></svg></a>
+    <a href="/support/" aria-current="page">Support <svg><use href="#i-chev"/></svg></a>
+    <a class="btn btn-primary" href="/#download">Get the app</a>
+  </nav>
+</header>
 
-  <main class="shell support-page" id="main-content">
-    <header class="page-intro">
-      <p class="eyebrow">Official support</p>
-      <h1>Livinai Support</h1>
+<main id="main">
+  <section class="intro">
+    <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="wrap narrow" style="position:relative">
+      <span class="eyebrow">Official support</span>
+      <h1>How can we <em class="accent">help?</em></h1>
       <p class="lede">Get help with your account, purchases, subscriptions or AI designs.</p>
-    </header>
+    </div>
+  </section>
 
-    <section class="contact-block" aria-labelledby="contact-title">
-      <div><h2 id="contact-title">Contact us</h2><p>Email <a href="mailto:livinai2025@gmail.com">livinai2025@gmail.com</a>. Include your device model, iOS version, and a brief description of the issue.</p></div>
-      <a class="button button-primary" href="mailto:livinai2025@gmail.com?subject=Livinai%20Support">Email support</a>
+  <div class="wrap narrow" style="padding-bottom:clamp(72px,10vw,120px)">
+    <section class="card contact" aria-labelledby="contact-title">
+      <span class="ic"><svg><use href="#i-mail"/></svg></span>
+      <div>
+        <h2 id="contact-title">Contact us</h2>
+        <p>Email <a href="mailto:livinai2025@gmail.com">livinai2025@gmail.com</a>. Include your device model, its system version and a short description of the issue.</p>
+      </div>
+      <a class="btn btn-primary" href="mailto:livinai2025@gmail.com?subject=Livinai%20Support">Email support</a>
     </section>
 
-    <section class="help-section"><h2>Purchases and subscriptions</h2><ul><li>If a purchase is missing, open <strong>Profile → Upgrade → Restore Purchases</strong>.</li><li>Manage or cancel an active subscription from the Livinai Pro screen or your Apple subscription settings.</li><li>Apple processes all iOS payments and refund requests.</li></ul></section>
+    <div class="grid-3 topics">
+      <section class="card topic" aria-labelledby="t-buy">
+        <span class="ic gold"><svg><use href="#i-card"/></svg></span>
+        <h2 id="t-buy">Purchases and subscriptions</h2>
+        <ul>
+          <li>If a purchase is missing, open <strong>Profile → Upgrade → Restore Purchases</strong>.</li>
+          <li>Manage or cancel a subscription from the Livinai Pro screen or your Apple subscription settings.</li>
+          <li>Apple processes all iOS payments and refund requests.</li>
+        </ul>
+      </section>
+      <section class="card topic" aria-labelledby="t-acc">
+        <span class="ic"><svg><use href="#i-user"/></svg></span>
+        <h2 id="t-acc">Account and sign-in</h2>
+        <ul>
+          <li>Sign in with the same Apple or Google method you used to create the account.</li>
+          <li>To permanently delete your account and data, open <strong>Profile → Account → Delete Account</strong>.</li>
+          <li>Deleting your account does not cancel an Apple subscription.</li>
+        </ul>
+      </section>
+      <section class="card topic" aria-labelledby="t-tech">
+        <span class="ic"><svg><use href="#i-spark"/></svg></span>
+        <h2 id="t-tech">Design or technical issues</h2>
+        <ul>
+          <li>Use a clear, well-lit photo and keep Livinai open while a design is processing.</li>
+          <li>Check your internet connection and install the latest version of Livinai.</li>
+          <li>If it keeps happening, email us the design mode, the approximate time and a screenshot of the error.</li>
+        </ul>
+      </section>
+    </div>
 
-    <section class="help-section"><h2>Account and sign-in</h2><ul><li>Sign in using the same Apple or Google method originally used for the account.</li><li>To permanently delete your account and Livinai data, open <strong>Profile → Account → Delete Account</strong>.</li><li>Deleting your Livinai account does not cancel an Apple subscription.</li></ul></section>
+    <aside class="note">
+      <svg><use href="#i-shield"/></svg>
+      <div><strong>For your security</strong><p>Never send passwords, Apple verification codes or full payment-card details. Livinai support will never ask for them.</p></div>
+    </aside>
 
-    <section class="help-section"><h2>Design or technical issues</h2><ul><li>Use a clear, well-lit image and keep Livinai open while a design is processing.</li><li>Check your internet connection and install the latest available Livinai version.</li><li>If the issue continues, email us with the design mode, approximate time, and a screenshot of the error.</li></ul></section>
+    <nav class="more" aria-label="More help">
+      <a class="card" href="/privacy/"><span><b>Privacy policy</b><small>How we handle your information</small></span><svg><use href="#i-arrow"/></svg></a>
+      <a class="card" href="/business/#demo"><span><b>Business enquiries</b><small>Staging, 3D and catalogues for teams</small></span><svg><use href="#i-arrow"/></svg></a>
+    </nav>
+  </div>
+</main>
 
-    <aside class="safety-note"><strong>For your security</strong><p>Never send passwords, Apple verification codes, or full payment-card details. Livinai support will not ask for them.</p></aside>
-  </main>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div><img class="logo" src="/assets/img/wordmark.png" alt="Livinai" width="96" height="26"><p>AI interior design, exterior design and 3D walkthroughs, in your pocket.</p></div>
+      <div><h2>App</h2><ul class="clean"><li><a href="/#features">Features</a></li><li><a href="/#walkthrough">3D walkthrough</a></li><li><a href="https://apps.apple.com/app/id6800486898" rel="noopener">App Store</a></li><li><a href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener">Google Play</a></li></ul></div>
+      <div><h2>Business</h2><ul class="clean"><li><a href="/business/">Livinai for Business</a></li><li><a href="/business/#catalogue">Catalogue Studio</a></li><li><a href="/business/#pricing">Pricing</a></li><li><a href="/business/#demo">Book a demo</a></li></ul></div>
+      <div><h2>Help</h2><ul class="clean"><li><a href="/support/" aria-current="page">Support</a></li><li><a href="/privacy/">Privacy policy</a></li><li><a href="mailto:livinai2025@gmail.com">Contact us</a></li></ul></div>
+    </div>
+    <div class="ftr-bottom"><span>© <span data-year>2026</span> Livinai</span><span>Design your space with AI.</span></div>
+  </div>
+</footer>
 
-  <footer class="site-footer"><div class="shell footer-wrap"><span>© 2026 Livinai</span><div class="footer-links"><a href="mailto:livinai2025@gmail.com">Contact</a><a href="/privacy/">Privacy Policy</a></div></div></footer>
+<script src="/assets/site.js" defer></script>
 </body>
 </html>

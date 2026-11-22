@@ -1,44 +1,312 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="google-site-verification" content="-CA9lM7yBlSuKU8desbEKLCvKZhcLF6pDLpUi4Rvw5c">
-  <meta name="description" content="Official support for the Livinai AI home design app.">
-  <meta name="theme-color" content="#F7F6F2">
-  <title>Livinai Support</title>
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Livinai: AI interior and exterior design app</title>
+<meta name="description" content="Redesign any room or home exterior from one photo, or draw a floor plan and walk through it in 3D. Livinai is the AI home design app for iPhone and Android.">
+<meta name="google-site-verification" content="-CA9lM7yBlSuKU8desbEKLCvKZhcLF6pDLpUi4Rvw5c">
+<meta name="theme-color" content="#FAF8F3">
+<link rel="canonical" href="https://livinai.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Livinai">
+<meta property="og:title" content="Livinai: AI interior and exterior design app">
+<meta property="og:description" content="Redesign any room from one photo, or walk through your floor plan in 3D.">
+<meta property="og:url" content="https://livinai.app/">
+<meta property="og:image" content="https://livinai.app/business/img/sweden-after.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="/business/img/sweden-after.webp">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.hero{position:relative;padding:clamp(40px,6vw,80px) 0 0;overflow:hidden}
+.hero-copy{position:relative;display:grid;justify-items:center;text-align:center;gap:24px;max-width:900px;margin:0 auto}
+.hero .lede{text-align:center}
+.hero .stores{justify-content:center}
+.assure{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;font-size:.88rem;color:var(--muted)}
+.assure span{display:inline-flex;align-items:center;gap:7px}
+.assure svg{width:16px;height:16px;color:var(--green-3)}
+.stage-wrap{position:relative;max-width:1120px;margin:clamp(44px,6vw,72px) auto 0}
+
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mode{display:grid;grid-template-rows:auto 1fr;overflow:hidden;text-decoration:none}
+.mode figure{margin:0;aspect-ratio:4/3;overflow:hidden;background:var(--bg-3)}
+.mode figure img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.mode:hover figure img{transform:scale(1.04)}
+.mode .body{display:grid;gap:10px;align-content:start;padding:22px 24px 26px}
+.mode .body p{color:var(--muted);font-size:.95rem}
+.mode .tag{justify-self:start;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;font-size:.75rem;font-weight:500;background:var(--sage);color:var(--green)}
+@media (max-width:900px){ .modes{grid-template-columns:1fr} .mode{grid-template-columns:1fr 1.2fr;grid-template-rows:none} .mode figure{aspect-ratio:auto;height:100%} }
+@media (max-width:600px){ .mode{grid-template-columns:1fr} .mode figure{aspect-ratio:16/10} }
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.step{position:relative;padding:28px;display:grid;gap:12px;align-content:start}
+.step::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--serif);font-size:2.4rem;line-height:1;color:var(--gold)}
+.step p{color:var(--muted);font-size:.95rem}
+@media (max-width:900px){ .steps{grid-template-columns:1fr} }
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,88px);align-items:center}
+.split .media{border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-3);background:var(--bg-3)}
+.split .media img{width:100%;height:auto}
+.split .copy{display:grid;gap:22px;justify-items:start}
+.ticks{display:grid;gap:14px}
+.ticks li{display:flex;gap:12px;align-items:flex-start;color:var(--ink-2)}
+.ticks svg{width:22px;height:22px;flex:none;color:var(--green-3);margin-top:1px}
+@media (max-width:900px){ .split{grid-template-columns:1fr} .split .media{max-width:480px} }
+
+.gallery{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.gallery figure{margin:0;position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:4/5;background:var(--bg-3)}
+.gallery img{width:100%;height:100%;object-fit:cover}
+.gallery figcaption{position:absolute;left:10px;bottom:10px;height:26px;display:flex;align-items:center;padding:0 10px;border-radius:999px;background:rgba(255,255,255,.88);font-size:.76rem;font-weight:500;color:var(--ink)}
+@media (max-width:1000px){ .gallery{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:560px){ .gallery{grid-template-columns:repeat(2,1fr)} }
+
+.biz{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
+.biz .copy{display:grid;gap:18px;justify-items:start}
+.biz ul{display:grid;gap:10px}
+.biz li{display:flex;gap:10px;align-items:center;color:rgba(255,255,255,.86);font-size:.95rem}
+.biz li svg{width:18px;height:18px;color:var(--gold-2);flex:none}
+.biz .acts{display:flex;flex-wrap:wrap;gap:10px}
+@media (max-width:860px){ .biz{grid-template-columns:1fr} }
+
+.faq-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(40px,6vw,96px);align-items:start}
+.faq-side{position:sticky;top:110px;display:grid;gap:18px;justify-items:start}
+@media (max-width:860px){ .faq-grid{grid-template-columns:1fr} .faq-side{position:static} }
+
+.get{display:grid;justify-items:center;text-align:center;gap:22px}
+.get img.appicon{width:88px;height:88px;border-radius:22px;background:#fff;padding:8px;box-shadow:var(--sh-2)}
+.get .stores{justify-content:center}
+</style>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to content</a>
-  <header class="site-header">
-    <nav class="shell nav-wrap" aria-label="Main navigation">
-      <a class="brand" href="/">Livinai</a>
-      <div class="nav-links"><a class="nav-link" href="/" aria-current="page">Support</a><a class="nav-link" href="/privacy/">Privacy</a></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.25" opacity=".28"/><path d="m8.2 12.4 2.5 2.4 5.1-5.3"/></symbol>
+    <symbol id="i-drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></symbol>
+    <symbol id="i-apple" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8 2.1-1.2 2.9-2.4c.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.9ZM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4Z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M4.2 2.6 13.6 12l-9.4 9.4c-.4-.2-.7-.7-.7-1.2V3.8c0-.5.3-1 .7-1.2Zm10.5 10.5 2.3 2.3-10.6 6.1 8.3-8.4Zm3.4-3.3 2.6 1.5c.8.5.8 1.6 0 2.1l-2.6 1.5-2.5-2.5 2.5-2.6ZM6.4 2.5 17 8.6l-2.3 2.3-8.3-8.4Z"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="brand" href="/" aria-label="Livinai home"><img src="/assets/img/wordmark.png" alt="Livinai" width="96" height="26"></a>
+    <nav class="nav" aria-label="Main">
+      <a href="/#features">Features</a>
+      <a href="/#walkthrough">3D walkthrough</a>
+      <a href="/business/">For business</a>
+      <a href="/support/">Support</a>
     </nav>
-  </header>
+    <div class="hdr-cta">
+      <a class="btn btn-primary btn-sm" href="#download">Get the app</a>
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mnav"><svg><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+  <nav class="mnav" id="mnav" aria-label="Mobile">
+    <a href="/#features">Features <svg><use href="#i-chev"/></svg></a>
+    <a href="/#walkthrough">3D walkthrough <svg><use href="#i-chev"/></svg></a>
+    <a href="/business/">For business <svg><use href="#i-chev"/></svg></a>
+    <a href="/support/">Support <svg><use href="#i-chev"/></svg></a>
+    <a class="btn btn-primary" href="#download">Get the app</a>
+  </nav>
+</header>
 
-  <main class="shell support-page" id="main-content">
-    <header class="page-intro">
-      <p class="eyebrow">Official support</p>
-      <h1>Livinai Support</h1>
-      <p class="lede">Get help with your account, purchases, subscriptions or AI designs.</p>
-    </header>
+<main id="main">
 
-    <section class="contact-block" aria-labelledby="contact-title">
-      <div><h2 id="contact-title">Contact us</h2><p>Email <a href="mailto:livinai2025@gmail.com">livinai2025@gmail.com</a>. Include your device model, iOS version, and a brief description of the issue.</p></div>
-      <a class="button button-primary" href="mailto:livinai2025@gmail.com?subject=Livinai%20Support">Email support</a>
-    </section>
+<!-- Hero -->
+<section class="hero">
+  <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">AI home design app</span>
+      <h1>See your home <em class="accent">redesigned</em> before you change a thing</h1>
+      <p class="lede">Take a photo of any room or home exterior, pick a style and colours, and Livinai shows you the new look in moments. Or draw a floor plan and walk through it in 3D.</p>
+      <div class="stores">
+        <a class="store" href="https://apps.apple.com/app/id6800486898" rel="noopener"><svg><use href="#i-apple"/></svg><span><small>Download on the</small><b>App Store</b></span></a>
+        <a class="store" href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener"><svg><use href="#i-play"/></svg><span><small>Get it on</small><b>Google Play</b></span></a>
+      </div>
+      <div class="assure">
+        <span><svg><use href="#i-check"/></svg>2 free designs to start</span>
+        <span><svg><use href="#i-check"/></svg>No password needed</span>
+        <span><svg><use href="#i-check"/></svg>Your designs stay private</span>
+      </div>
+    </div>
 
-    <section class="help-section"><h2>Purchases and subscriptions</h2><ul><li>If a purchase is missing, open <strong>Profile → Upgrade → Restore Purchases</strong>.</li><li>Manage or cancel an active subscription from the Livinai Pro screen or your Apple subscription settings.</li><li>Apple processes all iOS payments and refund requests.</li></ul></section>
+    <div class="stage-wrap">
+      <div class="stage">
+        <div class="ba" id="heroBa" data-ba>
+          <img class="after" src="/business/img/sweden-after.webp" alt="The same living room furnished in a warm, light style" width="1080" height="564" fetchpriority="high">
+          <img class="before" src="/business/img/sweden-before.webp" alt="An empty living room with wooden floors" width="1080" height="564">
+          <span class="lbl l">Before</span><span class="lbl r">After</span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="knob" aria-hidden="true"><svg><use href="#i-drag"/></svg></span>
+          <input type="range" min="0" max="100" value="50" aria-label="Drag to compare before and after">
+        </div>
+        <div class="switch" role="group" aria-label="Choose an example" data-switch="#heroBa">
+          <button type="button" aria-pressed="true" data-before="/business/img/sweden-before.webp" data-before-alt="An empty living room with wooden floors" data-after="/business/img/sweden-after.webp" data-after-alt="The same living room furnished in a warm, light style">Living room</button>
+          <button type="button" aria-pressed="false" data-before="/business/img/us-before.webp" data-before-alt="An empty family room with bay windows" data-after="/business/img/us-after.webp" data-after-alt="The same family room with soft sofas and a stone coffee table">Family room</button>
+          <button type="button" aria-pressed="false" data-before="/business/img/dubai-before.webp" data-before-alt="An empty double-height open-plan space" data-after="/business/img/dubai-after.webp" data-after-alt="The same open-plan space furnished with curved sofas">Open plan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <section class="help-section"><h2>Account and sign-in</h2><ul><li>Sign in using the same Apple or Google method originally used for the account.</li><li>To permanently delete your account and Livinai data, open <strong>Profile → Account → Delete Account</strong>.</li><li>Deleting your Livinai account does not cancel an Apple subscription.</li></ul></section>
+<!-- Features -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2>Three ways to start, <em class="accent">one app</em></h2>
+      <p class="lede">Start from what you have: a photo of a room, a photo of the outside of a home, or a floor plan.</p>
+    </div>
+    <div class="modes">
+      <article class="card mode reveal">
+        <figure><img src="/business/img/scene-living.webp" alt="A redesigned living room with soft white sofas" width="900" height="1125" loading="lazy"></figure>
+        <div class="body"><span class="tag">From a room photo</span><h3>Interior design</h3><p>Choose the room type, style and colours. Livinai keeps your walls and windows and restyles everything else.</p></div>
+      </article>
+      <article class="card mode reveal">
+        <figure><img src="/business/img/exterior.webp" alt="A modern two-storey home exterior in light stone" width="600" height="340" loading="lazy"></figure>
+        <div class="body"><span class="tag">From an outdoor photo</span><h3>Exterior design</h3><p>Try new facades, materials and colours on a house or building before you call a contractor.</p></div>
+      </article>
+      <article class="card mode reveal">
+        <figure><img src="/business/img/plan-to-3d.webp" alt="A floor plan turning into a furnished 3D room" width="840" height="486" loading="lazy"></figure>
+        <div class="body"><span class="tag">From a floor plan</span><h3>3D walkthrough</h3><p>Draw your rooms, give each one a type and style, then walk through the furnished result.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
 
-    <section class="help-section"><h2>Design or technical issues</h2><ul><li>Use a clear, well-lit image and keep Livinai open while a design is processing.</li><li>Check your internet connection and install the latest available Livinai version.</li><li>If the issue continues, email us with the design mode, approximate time, and a screenshot of the error.</li></ul></section>
+<!-- How it works -->
+<section class="sec tint" id="how">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>A new look in <em class="accent">three steps</em></h2>
+    </div>
+    <ol class="clean steps">
+      <li class="card step reveal"><h3>Add a photo</h3><p>Take a picture or pick one from your gallery. A clear, well-lit photo gives the best result.</p></li>
+      <li class="card step reveal"><h3>Choose your style</h3><p>Pick the room type, a design style and a colour palette that suits you.</p></li>
+      <li class="card step reveal"><h3>Generate and save</h3><p>See your redesign, compare it with the original, and keep your favourites in your Collection.</p></li>
+    </ol>
+  </div>
+</section>
 
-    <aside class="safety-note"><strong>For your security</strong><p>Never send passwords, Apple verification codes, or full payment-card details. Livinai support will not ask for them.</p></aside>
-  </main>
+<!-- 3D walkthrough -->
+<section class="sec" id="walkthrough">
+  <div class="wrap split">
+    <div class="media reveal"><img src="/business/img/walkthrough.webp" alt="The Livinai app showing a 3D walkthrough of a furnished living room" width="900" height="1125" loading="lazy"></div>
+    <div class="copy reveal">
+      <span class="eyebrow">3D walkthrough</span>
+      <h2>Walk through a home <em class="accent">before it exists</em></h2>
+      <p class="lede">Planning a new home or a renovation? Sketch it, furnish it, and step inside.</p>
+      <ul class="clean ticks">
+        <li><svg><use href="#i-check"/></svg>Draw rooms to scale on a metric grid</li>
+        <li><svg><use href="#i-check"/></svg>Give each room its own type and style</li>
+        <li><svg><use href="#i-check"/></svg>Explore the furnished result in real time</li>
+      </ul>
+      <a class="btn btn-secondary" href="#download">Try it in the app <svg class="arr"><use href="#i-arrow"/></svg></a>
+    </div>
+  </div>
+</section>
 
-  <footer class="site-footer"><div class="shell footer-wrap"><span>© 2026 Livinai</span><div class="footer-links"><a href="mailto:livinai2025@gmail.com">Contact</a><a href="/privacy/">Privacy Policy</a></div></div></footer>
+<!-- Gallery -->
+<section class="sec tint" id="gallery">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow">Made with Livinai</span>
+      <h2>Every room, <em class="accent">inside and out</em></h2>
+    </div>
+    <div class="gallery reveal">
+      <figure><img src="/business/img/scene-living.webp" alt="Living room with white sofas and a fireplace" width="900" height="1125" loading="lazy"><figcaption>Living room</figcaption></figure>
+      <figure><img src="/business/img/scene-bedroom.webp" alt="Calm bedroom with an arched headboard wall" width="900" height="1125" loading="lazy"><figcaption>Bedroom</figcaption></figure>
+      <figure><img src="/business/img/scene-kitchen.webp" alt="Light wood kitchen with an island" width="900" height="1125" loading="lazy"><figcaption>Kitchen</figcaption></figure>
+      <figure><img src="/business/img/scene-bathroom.webp" alt="Bathroom with a freestanding bathtub" width="900" height="1125" loading="lazy"><figcaption>Bathroom</figcaption></figure>
+      <figure><img src="/business/img/scene-terrace.webp" alt="Rooftop terrace with a fire pit at sunset" width="900" height="1125" loading="lazy"><figcaption>Terrace</figcaption></figure>
+      <figure><img src="/business/img/scene-villa.webp" alt="Modern villa exterior with a pool" width="900" height="1125" loading="lazy"><figcaption>Exterior</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- Business -->
+<section class="sec" id="business">
+  <div class="wrap">
+    <div class="band biz reveal">
+      <div class="copy">
+        <span class="eyebrow">Livinai for Business</span>
+        <h2>Selling spaces? Show buyers what they could be.</h2>
+        <p>Tools for estate agents, interior studios, developers and furniture brands.</p>
+        <ul class="clean">
+          <li><svg><use href="#i-check"/></svg>Virtual staging for listings</li>
+          <li><svg><use href="#i-check"/></svg>3D walkthroughs from floor plans</li>
+          <li><svg><use href="#i-check"/></svg>Furniture catalogues that show your products in real rooms</li>
+        </ul>
+        <div class="acts">
+          <a class="btn btn-light" href="/business/">Explore Livinai for Business <svg class="arr"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost-d" href="/business/#demo">Book a demo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec tint" id="faq">
+  <div class="wrap faq-grid">
+    <div class="faq-side reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Questions, <em class="accent">answered</em></h2>
+      <p class="lede">Can't find what you need? Our support page has more help.</p>
+      <a class="link" href="/support/">Visit support <svg><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="faq reveal">
+      <details><summary>Is Livinai free?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Every new account gets <strong>2 free designs</strong>. After that, you can subscribe to Livinai Pro, buy coins, or earn coins by watching a short ad.</p></div></details>
+      <details><summary>Which phones does it work on?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Livinai is available for iPhone on the <a href="https://apps.apple.com/app/id6800486898" rel="noopener">App Store</a> and for Android on <a href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener">Google Play</a>.</p></div></details>
+      <details><summary>Do I need an account?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes, so your designs are saved. Sign in with Apple or Google. There is no password to remember.</p></div></details>
+      <details><summary>Are my photos private?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Yes. Your photos and designs are private to your account unless you choose to share or export them. Read our <a href="/privacy/">privacy policy</a> for details.</p></div></details>
+      <details><summary>How do I delete my account?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>In the app, open <strong>Profile → Account → Delete Account</strong>. Deleting your account does not cancel an App Store subscription. Cancel that in your Apple account settings.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- Download -->
+<section class="sec" id="download">
+  <div class="wrap narrow get reveal">
+    <img class="appicon" src="/assets/img/icon.png" alt="" width="88" height="88">
+    <h2>Start designing <em class="accent">today</em></h2>
+    <p class="lede">Download Livinai and get 2 free designs.</p>
+    <div class="stores">
+      <a class="store" href="https://apps.apple.com/app/id6800486898" rel="noopener"><svg><use href="#i-apple"/></svg><span><small>Download on the</small><b>App Store</b></span></a>
+      <a class="store" href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener"><svg><use href="#i-play"/></svg><span><small>Get it on</small><b>Google Play</b></span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div><img class="logo" src="/assets/img/wordmark.png" alt="Livinai" width="96" height="26"><p>AI interior design, exterior design and 3D walkthroughs, in your pocket.</p></div>
+      <div><h2>App</h2><ul class="clean"><li><a href="/#features">Features</a></li><li><a href="/#walkthrough">3D walkthrough</a></li><li><a href="https://apps.apple.com/app/id6800486898" rel="noopener">App Store</a></li><li><a href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener">Google Play</a></li></ul></div>
+      <div><h2>Business</h2><ul class="clean"><li><a href="/business/">Livinai for Business</a></li><li><a href="/business/#catalogue">Catalogue Studio</a></li><li><a href="/business/#pricing">Pricing</a></li><li><a href="/business/#demo">Book a demo</a></li></ul></div>
+      <div><h2>Help</h2><ul class="clean"><li><a href="/support/">Support</a></li><li><a href="/privacy/">Privacy policy</a></li><li><a href="mailto:livinai2025@gmail.com">Contact us</a></li></ul></div>
+    </div>
+    <div class="ftr-bottom"><span>© <span data-year>2026</span> Livinai</span><span>Design your space with AI.</span></div>
+  </div>
+</footer>
+
+<script src="/assets/site.js" defer></script>
 </body>
 </html>
