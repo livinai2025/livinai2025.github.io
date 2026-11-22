@@ -39,16 +39,25 @@ button,select{font:inherit;color:inherit}
 .dock select{height:44px;min-width:0;max-width:200px;padding:0 34px 0 14px;border-radius:14px;border:1px solid var(--line);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23646d67' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 10px center/16px no-repeat;appearance:none;-webkit-appearance:none;cursor:pointer;text-overflow:ellipsis}
 .dock .ibtn{box-shadow:none;background:#fff;border:1px solid var(--line)}
 .dock .ibtn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
-.zoom{display:none;gap:6px}
-.plan .zoom{display:flex}
 .plan .rooms{display:none}
-.move-pad{position:fixed;z-index:5;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 60px);left:max(12px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(3,38px);gap:4px}
-.move-pad button{height:38px;border:0;border-radius:10px;background:var(--glass);color:var(--ink);font-weight:600;cursor:pointer;touch-action:none}
-.move-pad button:active{background:var(--accent);color:#fff}
-.move-pad button:first-child{grid-column:2}
-.move-pad button:nth-child(2){grid-column:1}
-.plan .move-pad{display:none}
-.hint{position:fixed;left:50%;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 74px);transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(17,26,21,.72);color:#fff;font-size:.84rem;z-index:4;white-space:nowrap;transition:opacity .5s;pointer-events:none}
+.move-stick,.plan-tools{position:fixed;z-index:5;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 62px)}
+.move-stick{--stick-size:clamp(82px,23dvh,140px);left:max(14px,env(safe-area-inset-left));width:var(--stick-size);height:var(--stick-size);border:1px solid rgba(255,255,255,.64);border-radius:50%;background:rgba(255,255,255,.74);box-shadow:0 8px 24px -12px rgba(0,0,0,.55);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.move-stick::before{content:"";position:absolute;inset:16%;border-radius:50%;border:1px solid rgba(22,74,55,.26);pointer-events:none}
+.move-stick.held{background:var(--glass);cursor:grabbing}
+.move-stick .direction{position:absolute;color:var(--muted);font-size:1rem;line-height:1;pointer-events:none}
+.move-stick .up{top:6%;left:50%;transform:translateX(-50%)}
+.move-stick .down{bottom:6%;left:50%;transform:translateX(-50%)}
+.move-stick .left{left:6%;top:50%;transform:translateY(-50%)}
+.move-stick .right{right:6%;top:50%;transform:translateY(-50%)}
+.stick-knob{position:absolute;left:50%;top:50%;width:43%;height:43%;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.24);transform:translate(-50%,-50%) translate(var(--stick-x,0px),var(--stick-y,0px));transition:transform .18s ease;pointer-events:none}
+.stick-knob svg{width:48%;height:48%}
+.move-stick.held .stick-knob{transition:none}
+.plan .move-stick,.plan-tools{display:none}
+.plan .plan-tools{left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--glass);box-shadow:0 8px 24px -12px rgba(0,0,0,.4);max-width:calc(100% - 16px)}
+.plan-tools button{min-width:46px;min-height:44px;padding:4px 7px;border:0;border-radius:11px;background:transparent;color:var(--ink);font-size:.7rem;font-weight:600;line-height:1;white-space:nowrap;cursor:pointer;display:grid;place-items:center;gap:3px}
+.plan-tools button:hover,.plan-tools button:focus-visible{background:#fff}
+.plan-tools svg{width:17px;height:17px}
+.hint{position:fixed;left:50%;top:calc(max(12px,env(safe-area-inset-top)) + 56px);transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);margin:0;padding:7px 12px;border-radius:14px;background:rgba(17,26,21,.76);color:#fff;font-size:.78rem;text-align:center;z-index:4;transition:opacity .4s;pointer-events:none}
 .hint.off{opacity:0}
 .made{position:fixed;right:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:4;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:var(--glass);font-size:.76rem;color:var(--muted);text-decoration:none}
 .made img{height:14px;width:auto}
@@ -62,9 +71,7 @@ button,select{font:inherit;color:inherit}
   .dock .ibtn{width:40px;height:40px}
   .chip img{height:24px;max-width:86px}
   .chip b{font-size:1rem}
-  .hint{display:none}
 }
-@media (max-height:360px){.move-pad{grid-template-columns:repeat(3,32px)}.move-pad button{height:32px}}
 .cover{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#eef1ef;text-align:center;transition:opacity .4s}
 .cover.off{opacity:0;pointer-events:none}
 .cover .box{max-width:380px;display:grid;gap:14px;justify-items:center}
@@ -91,20 +98,23 @@ button,select{font:inherit;color:inherit}
     <button type="button" data-mode="plan" aria-pressed="false" aria-label="From above"><span class="long">From above</span><span class="short">Above</span></button>
   </div>
   <label class="rooms"><span class="sr">Go to room</span><select id="room"></select></label>
-  <div class="zoom">
-    <button class="ibtn" type="button" id="zin" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg></button>
-    <button class="ibtn" type="button" id="zout" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
-  </div>
   <button class="ibtn" type="button" id="night" aria-pressed="false" aria-label="Evening light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg></button>
 </div>
 
-<div class="move-pad" id="movePad" role="group" aria-label="Move around the room" hidden>
-  <button type="button" data-move="up" aria-label="Walk forward">↑</button>
-  <button type="button" data-move="left" aria-label="Step left">←</button>
-  <button type="button" data-move="down" aria-label="Walk backward">↓</button>
-  <button type="button" data-move="right" aria-label="Step right">→</button>
+<div class="move-stick" id="moveStick" role="group" tabindex="0" aria-label="Movement stick" aria-describedby="moveHelp" hidden>
+  <span class="direction up" aria-hidden="true">↑</span><span class="direction down" aria-hidden="true">↓</span>
+  <span class="direction left" aria-hidden="true">←</span><span class="direction right" aria-hidden="true">→</span>
+  <span class="stick-knob" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4" r="1.6"/><path d="m5 12 5-2 3-2 3 3 3 1m-7-3-2 6-4 5m4-5 4 2 2 4"/></svg></span>
+  <span class="sr" id="moveHelp">Hold and drag to walk. Push farther to walk faster. On a keyboard, up and down arrows walk, left and right arrows turn, and A or D step sideways.</span>
 </div>
-<div class="hint" id="hint" hidden>Drag to look around · Arrow keys or W A S D to walk</div>
+<div class="plan-tools" id="planTools" role="group" aria-label="Overhead view controls" hidden>
+  <button type="button" data-plan="out" aria-label="Zoom out"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>Zoom out</button>
+  <button type="button" data-plan="in" aria-label="Zoom in"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m-7-7v14"/></svg>Zoom in</button>
+  <button type="button" data-plan="turn" aria-label="Turn the view"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10a8 8 0 1 0-2 7.5M20 5v5h-5"/></svg>Turn</button>
+  <button type="button" data-plan="tilt" aria-label="Switch between top view and 3D view"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Zm0 9 8-4.5M12 12 4 7.5M12 12v9"/></svg>Tilt</button>
+  <button type="button" data-plan="home" aria-label="Whole home"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 4H4v4m12-4h4v4m-4 12h4v-4M8 20H4v-4"/></svg>Whole home</button>
+</div>
+<div class="hint" id="hint" hidden></div>
 <a class="made" id="made" href="https://livinai.app/" target="_blank" rel="noopener" hidden><img src="/assets/img/wordmark.png" alt="">Made with Livinai</a>
 
 <div class="cover" id="cover"><div class="box" id="coverBox"><div class="spin" role="status" aria-label="Loading"></div><h1 id="coverTitle">Opening the home…</h1><p id="coverText">Getting the 3D model ready.</p></div></div>
@@ -121,15 +131,18 @@ button,select{font:inherit;color:inherit}
   const $ = (s) => document.querySelector(s);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const frame = $('#view');
-  let tour = null, mode = 'walk', loadingNotice, loadDeadline, modelPage;
+  let tour = null, mode = 'walk', loadingNotice, loadDeadline, modelPage, navigation, hintTimeout;
+  const touchControls = matchMedia('(pointer: coarse)');
 
   function fail(title, text) {
     finishLoading();
+    navigation?.stop();
     frame.hidden = true;
     frame.removeAttribute('src');
-    ['#bar', '#dock', '#hint', '#movePad'].forEach(selector => { $(selector).hidden = true; });
+    ['#bar', '#dock', '#hint', '#moveStick', '#planTools'].forEach(selector => { $(selector).hidden = true; });
     $('#coverBox').innerHTML = `<h1>${esc(title)}</h1><p>${esc(text)}</p><p><a href="${esc(location.href)}">Reload tour</a></p>`;
     $('#cover').classList.remove('off');
+    $('#cover').removeAttribute('aria-hidden');
   }
   function finishLoading() {
     clearTimeout(loadingNotice);
@@ -169,16 +182,35 @@ button,select{font:inherit;color:inherit}
   /** Commands into the 3D page (same origin, so its LivinaiScene API is reachable). */
   const run = (fn) => { try { const s = frame.contentWindow?.LivinaiScene; if (s) fn(s); } catch { /* page not ready */ } };
 
+  function showHint() {
+    const hint = $('#hint');
+    hint.textContent = mode === 'plan'
+      ? (touchControls.matches ? 'Drag to move · Pinch to zoom · Twist to turn' : 'Drag to move · Scroll to zoom · Use Turn or Tilt')
+      : (touchControls.matches ? 'Drag to look · Hold and drag the stick to walk' : 'Drag to look · ↑ ↓ walk · ← → turn · or use the stick');
+    hint.classList.remove('off');
+    clearTimeout(hintTimeout);
+    hintTimeout = setTimeout(() => hint.classList.add('off'), 6500);
+  }
+
   function controls() {
-    document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => {
+    const modes = document.querySelectorAll('[data-mode]');
+    modes.forEach((b) => b.addEventListener('click', () => {
+      if (mode === b.dataset.mode) return;
+      navigation.stop();
       mode = b.dataset.mode;
-      document.querySelectorAll('[data-mode]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      modes.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       document.body.classList.toggle('plan', mode === 'plan');
       run((s) => s.setMode(mode));
+      showHint();
     }));
     $('#room').addEventListener('change', (e) => run((s) => s.setRoom(Number(e.target.value))));
-    $('#zin').addEventListener('click', () => run((s) => s.birdZoom(0.8)));
-    $('#zout').addEventListener('click', () => run((s) => s.birdZoom(1.25)));
+    const planActions = {
+      out: s => s.birdZoom(1.3), in: s => s.birdZoom(1 / 1.3),
+      turn: s => s.birdTurn(Math.PI / 4), tilt: s => s.birdToggleTilt(), home: s => s.birdReset(),
+    };
+    document.querySelectorAll('[data-plan]').forEach(button => {
+      button.addEventListener('click', () => run(planActions[button.dataset.plan]));
+    });
     $('#night').addEventListener('click', (e) => {
       const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
       e.currentTarget.setAttribute('aria-pressed', String(on));
@@ -189,52 +221,149 @@ button,select{font:inherit;color:inherit}
       else document.documentElement.requestFullscreen?.().catch(() => {});
     });
     if (!document.documentElement.requestFullscreen) $('#fs').hidden = true;
-
-    const vectors = { up: [0, .85], down: [0, -.85], left: [-.85, 0], right: [.85, 0] };
-    const stop = () => run(s => s.setJoystick(0, 0));
-    document.querySelectorAll('[data-move]').forEach(button => {
-      const move = () => run(s => s.setJoystick(...vectors[button.dataset.move]));
-      button.addEventListener('pointerdown', event => {
-        if (event.button !== 0) return;
-        button.setPointerCapture(event.pointerId);
-        move();
-      });
-      button.addEventListener('lostpointercapture', stop);
-      button.addEventListener('pointerup', stop);
-      button.addEventListener('pointercancel', stop);
-      button.addEventListener('click', event => {
-        if (event.detail !== 0) return;
-        move();
-        setTimeout(stop, 180);
-      });
-    });
-    window.addEventListener('blur', stop);
   }
 
-  /** Keyboard walking: arrows or W A S D drive the 3D page's joystick. */
-  function keyboard(target) {
-    const down = new Set();
-    const apply = () => {
-      const x = (down.has('right') ? 1 : 0) - (down.has('left') ? 1 : 0);
-      const y = (down.has('up') ? 1 : 0) - (down.has('down') ? 1 : 0);
-      run((s) => s.setJoystick(x * 0.85, y * 0.85));
+  function setupNavigation() {
+    const stick = $('#moveStick'), knob = $('.stick-knob');
+    const keys = new Set();
+    // On a keyboard the arrows walk and turn (like most 3D tours); A and D step sideways.
+    const directions = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'turnLeft', KeyA: 'left', ArrowRight: 'turnRight', KeyD: 'right', KeyQ: 'turnLeft', KeyE: 'turnRight' };
+    const TURN_SPEED = 1.5; // radians per second while an arrow is held
+    let drag = null, turnFrame = 0, turnAt = 0;
+    function turnLoop(now) {
+      const down = new Set([...keys].map(code => directions[code]));
+      const way = Number(down.has('turnLeft')) - Number(down.has('turnRight'));
+      if (!way || mode !== 'walk') { turnFrame = 0; return; }
+      const dt = Math.min(.05, (now - (turnAt || now)) / 1000);
+      turnAt = now;
+      // The scene's yaw grows anticlockwise, so a positive turn looks left.
+      if (dt) run(s => s.turn(way * TURN_SPEED * dt));
+      turnFrame = requestAnimationFrame(turnLoop);
+    }
+    const drive = (x, y) => run(s => s.setJoystick(x, y));
+    const showStick = (x, y) => {
+      stick.style.setProperty('--stick-x', x + 'px');
+      stick.style.setProperty('--stick-y', y + 'px');
     };
-    const map = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
-    target.addEventListener('keydown', (e) => { const k = map[e.code]; if (!k || e.target?.tagName === 'SELECT') return; e.preventDefault(); if (!down.has(k)) { down.add(k); apply(); } });
-    target.addEventListener('keyup', (e) => { const k = map[e.code]; if (!k) return; down.delete(k); apply(); });
-    target.addEventListener('blur', () => { down.clear(); apply(); });
+    function driveKeys() {
+      if (drag || mode !== 'walk') return;
+      const down = new Set([...keys].map(code => directions[code]));
+      const x = Number(down.has('right')) - Number(down.has('left'));
+      // The app's joystick uses screen coordinates, with negative Y going forward.
+      const y = Number(down.has('down')) - Number(down.has('up'));
+      const magnitude = Math.hypot(x, y) || 1;
+      drive(.85 * x / magnitude, .85 * y / magnitude);
+      if (!turnFrame && (down.has('turnLeft') || down.has('turnRight'))) { turnAt = 0; turnFrame = requestAnimationFrame(turnLoop); }
+    }
+    function endDrag() {
+      if (!drag) return;
+      const { id } = drag;
+      drag = null;
+      stick.classList.remove('held');
+      showStick(0, 0);
+      if (stick.hasPointerCapture(id)) stick.releasePointerCapture(id);
+      driveKeys();
+    }
+    function stop() {
+      keys.clear();
+      cancelAnimationFrame(turnFrame);
+      turnFrame = 0;
+      endDrag();
+      drive(0, 0);
+    }
+    stick.addEventListener('pointerdown', event => {
+      if (drag || mode !== 'walk' || event.button !== 0) return;
+      event.preventDefault();
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      stick.setPointerCapture(event.pointerId);
+      stick.classList.add('held');
+      drive(0, 0);
+    });
+    stick.addEventListener('pointermove', event => {
+      if (drag?.id !== event.pointerId) return;
+      const x = event.clientX - drag.x, y = event.clientY - drag.y;
+      const distance = Math.hypot(x, y);
+      const travel = Math.max(1, (stick.clientWidth - knob.clientWidth) / 2);
+      const magnitude = Math.min(1, distance / travel);
+      const directionX = distance ? x / distance : 0, directionY = distance ? y / distance : 0;
+      showStick(directionX * travel * magnitude, directionY * travel * magnitude);
+      const scaled = Math.max(0, (magnitude - .14) / .86);
+      const speed = scaled * (.45 + .55 * scaled);
+      drive(directionX * speed, directionY * speed);
+    });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      stick.addEventListener(type, event => { if (drag?.id === event.pointerId) endDrag(); });
+    }
+    function bindKeys(target) {
+      target.addEventListener('keydown', event => {
+        if (mode !== 'walk' || !directions[event.code] || event.altKey || event.ctrlKey || event.metaKey
+          || event.target?.closest?.('select,input,textarea,[contenteditable="true"]')) return;
+        event.preventDefault();
+        if (keys.has(event.code)) return;
+        keys.add(event.code);
+        // A quick tap still turns a little; holding keeps turning smoothly.
+        const turn = directions[event.code];
+        if (turn === 'turnLeft' || turn === 'turnRight') run(s => s.turn((turn === 'turnLeft' ? 1 : -1) * .08));
+        driveKeys();
+      });
+      target.addEventListener('keyup', event => { if (keys.delete(event.code)) driveKeys(); });
+      target.addEventListener('blur', () => {
+        // Focus can move between the controls and the scene during two-handed touch.
+        setTimeout(() => { if (!document.hasFocus()) stop(); }, 0);
+      });
+    }
+    /**
+     * The scene drags the view like a photo, which suits a finger. With a mouse
+     * people expect the view to follow the hand (drag right to look right), so
+     * mouse drags in walk mode are mirrored around where the press started.
+     */
+    function mouseLook(sceneWindow) {
+      const held = new Map();
+      sceneWindow.addEventListener('pointerdown', event => {
+        if (event.pointerType === 'mouse' && mode === 'walk' && event.isTrusted) held.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      }, true);
+      sceneWindow.addEventListener('pointermove', event => {
+        const start = held.get(event.pointerId);
+        if (!start || !event.isTrusted || mode !== 'walk') return;
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        event.target.dispatchEvent(new sceneWindow.PointerEvent('pointermove', {
+          bubbles: true, cancelable: true, pointerId: event.pointerId, pointerType: 'mouse', isPrimary: event.isPrimary,
+          buttons: event.buttons, clientX: 2 * start.x - event.clientX, clientY: 2 * start.y - event.clientY,
+        }));
+      }, true);
+      for (const type of ['pointerup', 'pointercancel']) {
+        sceneWindow.addEventListener(type, event => { held.delete(event.pointerId); }, true);
+      }
+    }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+    return {
+      stop,
+      ready(sceneWindow) {
+        bindKeys(window);
+        bindKeys(sceneWindow);
+        mouseLook(sceneWindow);
+        sceneWindow.addEventListener('wheel', event => {
+          if (mode !== 'plan' || !event.deltaY) return;
+          event.preventDefault();
+          const delta = event.deltaY * (event.deltaMode ? .04 : .0025);
+          run(s => s.birdZoom(Math.exp(Math.max(-.32, Math.min(.32, delta)))));
+        }, { passive: false });
+      },
+    };
   }
 
   addEventListener('message', (e) => {
     if (e.origin !== location.origin || e.source !== frame.contentWindow || !e.data?.livinai3d) return;
     let msg; try { msg = JSON.parse(e.data.livinai3d); } catch { return; }
     if (msg.type === 'ready') {
-      if (!$('#coverText')) return;
+      if (!$('#coverText') || $('#cover').classList.contains('off')) return;
       finishLoading();
       $('#cover').classList.add('off');
-      ['#bar', '#dock', '#hint', '#movePad'].forEach((s) => { $(s).hidden = false; });
-      setTimeout(() => $('#hint').classList.add('off'), 6000);
-      try { keyboard(frame.contentWindow); } catch { /* keyboard optional */ }
+      $('#cover').setAttribute('aria-hidden', 'true');
+      ['#bar', '#dock', '#hint', '#moveStick', '#planTools'].forEach((s) => { $(s).hidden = false; });
+      showHint();
+      navigation.ready(frame.contentWindow);
       if (!embedded) frame.focus();
     } else if (msg.type === 'error') {
       fail('The 3D view could not start', msg.message || 'Try another browser, or open this link on a computer.');
@@ -274,6 +403,7 @@ button,select{font:inherit;color:inherit}
       frame.src = modelPage;
       frame.hidden = false;
       status('Loading the home…');
+      navigation = setupNavigation();
       controls();
       loadingNotice = setTimeout(() => status('Still loading the 3D model…'), 15000);
       loadDeadline = setTimeout(() => fail('The tour took too long to load', 'Try reloading on a faster connection.'), 90000);
