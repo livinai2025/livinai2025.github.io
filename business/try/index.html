@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>See it in your room · Livinai</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f3;--bg-2:#f3eee4;--bg-3:#ebe4d6;--ink:#111a15;--muted:#646d67;--faint:#949b95;--line:rgba(17,26,21,.09);--line-2:rgba(17,26,21,.16);--green:#164a37;--sage:#e8eee8;--sage-2:#d2dfd5;color-scheme:light}
+[hidden]{display:none!important}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#fff;color:var(--ink);font:15px/1.55 "Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}img{display:block;max-width:100%}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100%;max-width:760px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+header b{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:1.35rem;letter-spacing:-.02em}
+.x{width:36px;height:36px;border-radius:50%;border:0;background:var(--bg);font-size:1.3rem;cursor:pointer}
+main{padding:20px;display:grid;gap:16px;align-content:start;overflow:auto}
+.pick{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.pick button{flex:none;width:84px;border-radius:12px;border:2px solid var(--line);background:var(--bg);padding:6px;cursor:pointer;display:grid;gap:4px;text-align:left}
+.pick button img{width:100%;aspect-ratio:1;object-fit:contain}
+.pick small{font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick button[aria-pressed=true]{border-color:var(--green);background:var(--sage)}
+.stage{position:relative;border-radius:18px;overflow:hidden;background:var(--bg-2);aspect-ratio:4/3;--pos:50%}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage .before{clip-path:inset(0 calc(100% - var(--pos)) 0 0)}
+.stage .line{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 16px rgba(0,0,0,.2);pointer-events:none}
+.stage input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+.ph b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
+.spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--sage-2);border-top-color:var(--green);animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load{background:rgba(250,248,243,.88);backdrop-filter:blur(6px)}
+.lbl{position:absolute;top:10px;padding:3px 9px;border-radius:999px;background:rgba(17,26,21,.55);color:#fff;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.lbl.l{left:10px}.lbl.r{right:10px;background:rgba(22,74,55,.85)}
+footer{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;border:1px solid var(--line-2);background:#fff;font-weight:500;cursor:pointer;text-decoration:none}
+.btn.p{background:var(--green);border-color:var(--green);color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+small.note{color:var(--faint);font-size:.78rem}
+.err{color:#a2372c;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><b>See it in your room</b><button class="x" id="close" aria-label="Close">×</button></header>
+  <main>
+    <div class="pick" id="pick" role="group" aria-label="Choose a piece"></div>
+    <div class="stage" id="stage">
+      <div class="ph" id="ph"><div><b>Take or upload a photo of your room</b>We'll show the piece in it, in about a minute.</div></div>
+    </div>
+    <p class="err" id="err" hidden></p>
+  </main>
+  <footer>
+    <small class="note">Your photo is only used to make this picture. Powered by Livinai.</small>
+    <label class="btn p" id="upBtn" tabindex="0">Upload a room photo<input type="file" accept="image/jpeg,image/png,image/webp" id="file" hidden></label>
+  </footer>
+</div>
+<script src="../biz.js"></script>
+<script>
+(async () => {
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const qs = new URLSearchParams(location.search), cid = qs.get('c');
+  const err = m => { $('#err').textContent = m; $('#err').hidden = !m; };
+  $('#close').onclick = () => { if (parent !== window) parent.postMessage('livinai-try-close', '*'); else history.back(); };
+  let cat, cur;
+  try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid))).catalogue; }
+  catch (e) { err(e.status === 404 ? 'This catalogue could not be found.' : e.message); $('#upBtn').hidden = true; return; }
+  if (!cat.tryonEnabled) { $('#ph').innerHTML = '<div><b>Room previews are coming soon</b>This store has not switched them on yet.</div>'; $('#upBtn').hidden = true; }
+  cur = cat.products.find(p => p.id === qs.get('p')) || cat.products[0];
+  const renderPick = () => {
+    $('#pick').innerHTML = cat.products.map(p => `<button data-id="${esc(p.id)}" aria-pressed="${p === cur}" title="${esc(p.name)}"><img src="${esc(p.cutoutUrl)}" alt=""><small>${esc(p.name)}</small></button>`).join('');
+  };
+  renderPick();
+  $('#pick').onclick = e => { const b = e.target.closest('button'); if (b) { cur = cat.products.find(p => p.id === b.dataset.id); renderPick(); } };
+  $('#upBtn').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file').click(); } };
+  $('#file').onchange = async () => {
+    const f = $('#file').files[0]; $('#file').value = ''; if (!f) return;
+    err('');
+    let roomImage; try { roomImage = await Biz.fileToDataUrl(f, { maxSide: 1600 }); } catch (e) { return err(e.message); }
+    const st = $('#stage');
+    st.innerHTML = `<img src="${roomImage}" alt="Your room"><div class="ph load"><div><div class="spin"></div><b>Placing ${esc(cur.name)}</b>This takes about 30 to 60 seconds.</div></div>`;
+    $('#upBtn').style.pointerEvents = 'none'; $('#upBtn').style.opacity = .6;
+    try {
+      const d = await Biz.call(`/catalogues/${encodeURIComponent(cat.id)}/tryon`, { method: 'POST', body: { productId: cur.id, roomImage } });
+      st.innerHTML = `<img class="after" src="${esc(d.imageUrl)}" alt="Your room with ${esc(cur.name)}"><img class="before" src="${esc(d.beforeUrl)}" alt="Your room before"><span class="lbl l">Before</span><span class="lbl r">With ${esc(cur.name)}</span><div class="line"></div><input type="range" min="0" max="100" value="50" aria-label="Compare before and after">`;
+      const r = st.querySelector('input'); r.oninput = () => st.style.setProperty('--pos', r.value + '%');
+      $('#upBtn').firstChild.textContent = 'Try another photo';
+    } catch (e) {
+      st.innerHTML = `<div class="ph"><div><b>That didn't work</b>${esc(e.message)}</div></div>`;
+    } finally { $('#upBtn').style.pointerEvents = ''; $('#upBtn').style.opacity = ''; }
+  };
+})();
+</script>
+</body>
+</html>
