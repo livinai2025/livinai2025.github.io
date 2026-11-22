@@ -76,6 +76,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
 .tryframe{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px}
 .tryframe[hidden]{display:none}
 .tryframe iframe{position:relative;width:min(720px,100%);height:min(720px,calc(100vh - 32px));border:0;border-radius:24px;background:#fff;box-shadow:var(--sh3)}
+@media screen and (min-width:1100px){.grid.sample{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.panel{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}.gal{min-height:0;grid-template: auto auto / minmax(0,1fr)}.gal .main{aspect-ratio:4/3;min-height:0;overflow:hidden}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}.actions .btn span{display:none}}
 /* print: a lookbook */
@@ -99,8 +100,8 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   <div class="wrap">
     <a class="brand" id="brand" href="#">Catalogue</a>
     <div class="actions">
-      <button class="btn" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Share</span></button>
-      <button class="btn" id="pdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8Z"/><path d="M14 3.5V8h4.5"/></svg><span>PDF</span></button>
+      <button class="btn" id="shareBtn" aria-label="Share catalogue"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Share</span></button>
+      <button class="btn" id="pdfBtn" aria-label="Print or save as PDF"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8Z"/><path d="M14 3.5V8h4.5"/></svg><span>PDF</span></button>
       <a class="btn p" id="siteBtn" hidden target="_blank" rel="noopener">Visit store</a>
     </div>
   </div>
@@ -152,7 +153,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   if (/^#[0-9a-f]{6}$/i.test(cat.brandColor || '')) { const r = document.documentElement.style; r.setProperty('--green', cat.brandColor); r.setProperty('--green-2', cat.brandColor); }
   if (cat.hideBranding) $('#madeWith').hidden = true;
   if (cat.logoUrl) { const im = new Image(); im.src = cat.logoUrl; im.alt = cat.brand || 'Logo'; $('#brand').replaceChildren(im); } else $('#brand').textContent = cat.brand || 'Catalogue';
-  $('#brandEy').textContent = cat.brand ? `${cat.brand} · Collection` : 'Collection';
+  $('#brandEy').textContent = sample ? 'Sample catalogue' : cat.brand ? `${cat.brand} · Collection` : 'Collection';
   $('#title').textContent = cat.title;
   const sceneCount = cat.products.reduce((n, p) => n + p.scenes.length, 0);
   $('#sub').textContent = sample
@@ -163,6 +164,7 @@ footer a{color:var(--green);text-decoration:none;font-weight:500}
   $('#foot').textContent = cat.brand ? `© ${new Date().getFullYear()} ${cat.brand}` : '';
   if (cat.website) { $('#siteBtn').href = cat.website; $('#siteBtn').hidden = false; }
   state.hidden = true; $('#hero').hidden = false; $('#grid').hidden = false;
+  $('#grid').classList.toggle('sample', sample);
 
   $('#grid').innerHTML = cat.products.map((p, i) => {
     const hero = p.scenes[0];
