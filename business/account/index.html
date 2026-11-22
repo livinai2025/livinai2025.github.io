@@ -149,16 +149,16 @@ select.mini{padding:0 8px}
       <div><img class="logo" src="/assets/img/wordmark.png" alt="Livinai" width="96" height="26"><p>AI room design, 3D walkthroughs and furniture catalogues for teams that sell spaces.</p></div>
       <div><h2>App</h2><ul class="clean"><li><a href="/#features">Features</a></li><li><a href="/#walkthrough">3D walkthrough</a></li><li><a href="https://apps.apple.com/app/id6800486898" rel="noopener">App Store</a></li><li><a href="https://play.google.com/store/apps/details?id=com.livinai.app" rel="noopener">Google Play</a></li></ul></div>
       <div><h2>Business</h2><ul class="clean"><li><a href="/business/">Livinai for Business</a></li><li><a href="/business/#catalogue">Catalogue Studio</a></li><li><a href="/business/#pricing">Pricing</a></li><li><a href="/business/account/" aria-current="page">Team account</a></li></ul></div>
-      <div><h2>Help</h2><ul class="clean"><li><a href="/support/">Support</a></li><li><a href="/privacy/">Privacy policy</a></li><li><a href="/terms/">Terms of use</a></li><li><a href="/refunds/">Refund policy</a></li><li><a href="mailto:business@livinai.app">Contact us</a></li></ul></div>
+      <div><h2>Help</h2><ul class="clean"><li><a href="/support/">Support</a></li><li><a href="/privacy/">Privacy policy</a></li><li><a href="/terms/">Terms of use</a></li><li><a href="/acceptable-use/">Acceptable use</a></li><li><a href="/refunds/">Refund policy</a></li><li><a href="mailto:business@livinai.app">Contact us</a></li></ul></div>
     </div>
-    <div class="ftr-bottom"><span>© <span data-year>2026</span> Livinai</span><span>Payments are handled by Paddle, our reseller.</span></div>
+    <div class="ftr-bottom"><span>© <span data-year>2026</span> Livinai</span><span>Payments are handled by Creem, our reseller.</span></div>
   </div>
 </footer>
 
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js?v=business-3"></script>
+<script src="/business/biz.js?v=business-4"></script>
 <script>
 (() => {
   const plan = () => S.data?.billing?.plan || Biz.TEAM_PLAN;
@@ -174,7 +174,7 @@ select.mini{padding:0 8px}
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const view = $('#view');
   const qs = new URLSearchParams(location.search);
-  const paymentLinkId = qs.get('_ptxn');
+  const returnedCheckout = qs.get('checkout') === 'done' ? (qs.get('checkout_id') || '') : null;
   let inviteToken = qs.get('invite') || '';
   const S = { data: null, tab: qs.get('tab') || 'overview', cycle: qs.get('cycle') === 'month' ? 'month' : 'year', seats: Biz.TEAM_PLAN.seatsIncluded, name: '' };
 
@@ -220,7 +220,7 @@ select.mini{padding:0 8px}
       <div class="l"><span>Team plan, ${included()} seats</span><span>${money(p.team)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>
       ${extra ? `<div class="l"><span>${extra} extra seat${extra === 1 ? '' : 's'} × ${money(p.seat)}</span><span>${money(extra * p.seat)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>` : ''}
       <div class="l tot"><span>Total</span><span>${per}</span></div>
-      <small>${checkoutAvailable(S.data) && trialOn() ? `Free for ${trialDays()} days with ${plan().trialCredits} shared image credits. Cancel before the trial ends to avoid being charged. ` : ''}Paddle shows applicable tax at checkout. Manage invoices and cancellation from your Team account.</small>`;
+      <small>${checkoutAvailable(S.data) && trialOn() ? `Free for ${trialDays()} days with ${plan().trialCredits} shared image credits. Cancel before the trial ends to avoid being charged. ` : ''}Creem, our reseller, shows applicable tax at checkout. Manage invoices and cancellation from your Team account.</small>`;
   }
 
   function buyPanel(d) {
@@ -262,7 +262,7 @@ select.mini{padding:0 8px}
           ${billingOff
             ? `<p class="note">Online checkout is currently unavailable. <a href="/business/#demo">Contact us about Team</a>.</p>`
             : `<button class="btn btn-primary" id="payBtn" type="button">${trialOn() ? `Start ${trialDays()}-day free trial` : 'Continue to secure payment'} <svg class="arr"><use href="#i-arrow"/></svg></button>
-               <small class="muted">Payment methods are shown in Paddle checkout.</small>`}
+               <small class="muted">You’ll pay on Creem’s secure checkout page.</small>`}
         </div>
       </section>`;
   }
@@ -283,63 +283,29 @@ select.mini{padding:0 8px}
     $('#payBtn')?.addEventListener('click', startCheckout);
   }
 
-  /* ───── Paddle checkout ───── */
-  let paddleReady = null;
-  const checkoutSettings = { displayMode: 'overlay', theme: 'light', locale: 'en', allowLogout: false };
-  function loadPaddle(cfg) {
-    paddleReady ??= new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
-      s.onload = () => {
-        try {
-          if (cfg.environment !== 'production') window.Paddle.Environment.set('sandbox');
-          window.Paddle.Initialize({ token: cfg.clientToken, checkout: { settings: checkoutSettings }, eventCallback: onPaddleEvent });
-          resolve();
-        } catch (e) { reject(e); }
-      };
-      s.onerror = () => reject(new Error('The payment window could not load. Check your connection and try again.'));
-      document.head.appendChild(s);
-    });
-    return paddleReady.catch(error => { paddleReady = null; throw error; });
-  }
+  /* ───── Creem checkout ───── */
+  let checkoutPending = false, waitingForActivation = false;
 
-  const validTransaction = id => /^txn_[a-z0-9]{26}$/i.test(id || '');
-  let checkoutPending = false, checkoutFromLink = false, waitingForActivation = false, activeTransaction = '';
-  async function onPaddleEvent(e) {
-    if (e?.name === 'checkout.closed' || e?.name === 'checkout.error') {
-      const wasPending = checkoutPending;
-      checkoutPending = false;
-      if (wasPending && !waitingForActivation && !checkoutFromLink && S.data && !S.data.team?.live) render();
-      if (e.name === 'checkout.error') billingNotice('Paddle could not open checkout. Try again or contact business@livinai.app.');
-      return;
-    }
-    if (e?.name !== 'checkout.completed' || !checkoutPending || waitingForActivation) return;
-    if (e.data?.transaction_id && e.data.transaction_id !== activeTransaction) return;
-    checkoutPending = false;
-    billingNotice('');
-    if (checkoutFromLink) {
-      qs.delete('_ptxn');
-      history.replaceState(null, '', location.pathname + (qs.size ? '?' + qs.toString() : ''));
-      window.Paddle?.Checkout?.close?.();
-      say(S.data ? 'Paddle confirmed the update.' : 'Paddle confirmed the update. Sign in to see your team.');
-      load();
-      return;
-    }
+  /** Creem sends the owner back here with ?checkout=done&checkout_id=…; wait for the plan to go live. */
+  async function finishCheckout() {
+    if (returnedCheckout === null || waitingForActivation) return false;
     waitingForActivation = true;
-    view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Checkout complete</h2><p class="muted">We’re waiting for Paddle to confirm your plan.</p></div></section>';
+    ['checkout', 'checkout_id', 'order_id', 'customer_id', 'subscription_id', 'product_id', 'request_id', 'signature'].forEach(k => qs.delete(k));
+    history.replaceState(null, '', location.pathname + (qs.size ? '?' + qs.toString() : ''));
+    view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Checkout complete</h2><p class="muted">We’re waiting for Creem to confirm your plan.</p></div></section>';
     for (let i = 0; i < 20; i += 1) {
       try {
-        const d = await team('/sync', { method: 'POST' });
+        const d = await team('/sync', { method: 'POST', body: { checkoutId: returnedCheckout } });
         if (d.team?.live) {
-          S.data = d; S.tab = 'members'; window.Paddle?.Checkout?.close?.(); waitingForActivation = false;
-          render(); say('Your Team plan is active. Invite your colleagues.'); return;
+          S.data = d; S.tab = 'members'; waitingForActivation = false;
+          render(); say('Your Team plan is active. Invite your colleagues.'); return true;
         }
       } catch { /* keep waiting for the webhook */ }
       await new Promise((r) => setTimeout(r, 2500));
     }
     waitingForActivation = false;
-    billingNotice('Checkout completed. Paddle is still confirming your subscription. Refresh to check activation.');
-    load();
+    billingNotice('Checkout completed. Creem is still confirming your subscription. Refresh to check activation.');
+    return false;
   }
 
   async function startCheckout() {
@@ -353,35 +319,11 @@ select.mini{padding:0 8px}
         S.data = await team('', { method: 'POST', body: { name } });
       }
       const c = await team('/checkout', { method: 'POST', body: { cycle: S.cycle, seats: S.seats } });
-      if (!Biz.checkoutAvailable(c) || !validTransaction(c.transactionId)) throw new Error('Paddle checkout is temporarily unavailable.');
-      await loadPaddle(c);
-      checkoutFromLink = false;
-      activeTransaction = c.transactionId;
+      if (!Biz.checkoutAvailable(c) || !/^https:\/\/[a-z0-9.-]*creem\.io\//i.test(c.checkoutUrl || '')) throw new Error('Checkout is temporarily unavailable. Please try again.');
       checkoutPending = true;
-      window.Paddle.Checkout.open({
-        transactionId: c.transactionId,
-        customer: { email: c.customer.email },
-        settings: checkoutSettings,
-      });
+      location.assign(c.checkoutUrl);
     } catch (e) { checkoutPending = false; billingNotice(e.message); }
     finally { if (btn.isConnected && !checkoutPending) btn.disabled = false; }
-  }
-
-  async function openPaymentLink() {
-    if (!paymentLinkId) return;
-    if (!validTransaction(paymentLinkId)) return billingNotice('This Paddle payment link is incomplete.');
-    try {
-      const { billing } = await Biz.call('/config', { auth: false });
-      if (!checkoutAvailable({ billing })) return billingNotice('Online billing is currently unavailable. Contact business@livinai.app for help with your payment.');
-      checkoutFromLink = true;
-      activeTransaction = paymentLinkId;
-      checkoutPending = true;
-      // Paddle.js opens the transaction in the _ptxn query parameter on initialization.
-      await loadPaddle(billing);
-    } catch (error) {
-      checkoutPending = false;
-      billingNotice(error.message);
-    }
   }
 
   /* ───── team ───── */
@@ -637,7 +579,10 @@ select.mini{padding:0 8px}
       const data = await team('');
       if (session !== Biz.store.get('lvb_user')) return;
       S.data = data;
-      if (data.checkoutStarted && data.member?.role === 'owner') {
+      if (returnedCheckout !== null && data.member?.role === 'owner' && !data.team?.live) {
+        render();
+        if (await finishCheckout()) return;
+      } else if (data.checkoutStarted && data.member?.role === 'owner') {
         try {
           const synced = await team('/sync', { method: 'POST' });
           if (session !== Biz.store.get('lvb_user')) return;
@@ -652,7 +597,6 @@ select.mini{padding:0 8px}
     }
   }
   load();
-  openPaymentLink();
 })();
 </script>
 </body>

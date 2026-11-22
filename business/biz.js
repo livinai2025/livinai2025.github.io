@@ -7,15 +7,16 @@
   const SITE = local ? `${location.origin}/business/` : 'https://livinai.app/business/';
   const TEAM_PLAN = {
     currency: 'USD', seatsIncluded: 3, maxSeats: 200, trialDays: 14,
-    trialCredits: 10, monthlyCredits: 100, creditsPerExtraSeat: 25,
-    prices: { month: { team: 9900, seat: 2500 }, year: { team: 94800, seat: 30000 } },
+    trialCredits: 10, monthlyCredits: 100, creditsPerExtraSeat: 33,
+    // Per seat with a 3-seat minimum: `team` is the 3-seat price.
+    prices: { month: { team: 9900, seat: 3300 }, year: { team: 94800, seat: 31600 } },
   };
   const money = (cents, currency = TEAM_PLAN.currency) => new Intl.NumberFormat('en-US', {
     style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0,
   }).format(cents / 100);
-  const checkoutAvailable = billing => Boolean(billing?.ready && billing.plan && (
-    (billing.environment === 'production' && billing.clientToken?.startsWith('live_')) ||
-    (local && billing.environment === 'sandbox' && billing.clientToken?.startsWith('test_'))
+  // Live checkout on the real site; Creem test mode only when running locally.
+  const checkoutAvailable = billing => Boolean(billing?.ready && billing.plan && billing.provider === 'creem' && (
+    billing.environment === 'live' || (local && billing.environment === 'test')
   ));
 
   const memory = new Map();
