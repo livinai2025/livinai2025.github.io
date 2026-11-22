@@ -96,6 +96,7 @@ select.mini{padding:0 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <link rel="stylesheet" href="/business/signin.css">
+<link rel="stylesheet" href="/business/workspace.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -137,6 +138,7 @@ select.mini{padding:0 8px}
       <div><span class="eyebrow">Livinai for Business</span><h1 id="title">Team account</h1></div>
       <div class="who" id="who" hidden><span id="whoEmail"></span><button class="mini" id="signOut" type="button">Sign out</button></div>
     </div>
+    <p class="note billing-notice" id="billingNotice" role="status" hidden></p>
     <div id="view" aria-live="polite"><div class="spin" role="status" aria-label="Loading"></div></div>
   </div>
 </main>
@@ -156,7 +158,7 @@ select.mini{padding:0 8px}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="/assets/site.js" defer></script>
-<script src="/business/biz.js?v=catalogue-1"></script>
+<script src="/business/biz.js?v=business-3"></script>
 <script>
 (() => {
   const plan = () => S.data?.billing?.plan || Biz.TEAM_PLAN;
@@ -164,7 +166,7 @@ select.mini{padding:0 8px}
   const maxSeats = () => plan().maxSeats;
   const trialDays = () => plan().trialDays;
   const discount = () => Math.round(100 * (1 - plan().prices.year.team / (12 * plan().prices.month.team)));
-  const checkoutAvailable = d => Boolean(d.billing?.ready && d.billing?.plan && (d.billing.environment === 'production' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'));
+  const checkoutAvailable = d => Biz.checkoutAvailable(d?.billing);
   /** A team gets one free trial. */
   const trialOn = () => !S.data?.team?.trialUsed;
 
@@ -178,6 +180,11 @@ select.mini{padding:0 8px}
 
   let toastT;
   function say(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200); }
+  function billingNotice(message) {
+    const notice = $('#billingNotice');
+    notice.textContent = message;
+    notice.hidden = !message;
+  }
   const money = (cents) => Biz.money(cents, plan().currency);
   const date = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   const team = (path, opts) => Biz.call('/team' + path, opts);
@@ -194,7 +201,7 @@ select.mini{padding:0 8px}
   function signIn() {
     $('#title').textContent = inviteToken ? 'Join your team' : 'Team account';
     view.innerHTML = `
-      <section class="card panel"><div class="center">
+      <section class="card panel sign-in-panel"><div class="center">
         <span class="eyebrow">${inviteToken ? 'You are invited' : 'Sign in'}</span>
         <h2 style="font-family:var(--serif);font-weight:400;font-size:2rem">${inviteToken ? 'Join your team on Livinai' : 'Sign in to your team'}</h2>
         <p class="muted">${inviteToken ? 'Sign in using the email address on your invitation to access your team’s workspace.' : 'Use the same Livinai account as in the app. You can also create an account by continuing with Google.'}</p>
@@ -296,17 +303,20 @@ select.mini{padding:0 8px}
     return paddleReady.catch(error => { paddleReady = null; throw error; });
   }
 
-  let checkoutPending = false, checkoutFromLink = false, waitingForActivation = false;
+  const validTransaction = id => /^txn_[a-z0-9]{26}$/i.test(id || '');
+  let checkoutPending = false, checkoutFromLink = false, waitingForActivation = false, activeTransaction = '';
   async function onPaddleEvent(e) {
     if (e?.name === 'checkout.closed' || e?.name === 'checkout.error') {
       const wasPending = checkoutPending;
       checkoutPending = false;
       if (wasPending && !waitingForActivation && !checkoutFromLink && S.data && !S.data.team?.live) render();
-      if (e.name === 'checkout.error') say('Paddle could not open checkout. Try again or contact support.');
+      if (e.name === 'checkout.error') billingNotice('Paddle could not open checkout. Try again or contact business@livinai.app.');
       return;
     }
     if (e?.name !== 'checkout.completed' || !checkoutPending || waitingForActivation) return;
+    if (e.data?.transaction_id && e.data.transaction_id !== activeTransaction) return;
     checkoutPending = false;
+    billingNotice('');
     if (checkoutFromLink) {
       qs.delete('_ptxn');
       history.replaceState(null, '', location.pathname + (qs.size ? '?' + qs.toString() : ''));
@@ -316,11 +326,10 @@ select.mini{padding:0 8px}
       return;
     }
     waitingForActivation = true;
-    const tx = e.data?.transaction_id;
     view.innerHTML = '<section class="card panel"><div class="center"><div class="spin" role="status"></div><h2>Checkout complete</h2><p class="muted">We’re waiting for Paddle to confirm your plan.</p></div></section>';
     for (let i = 0; i < 20; i += 1) {
       try {
-        const d = await team('/sync', { method: 'POST', body: { transactionId: tx } });
+        const d = await team('/sync', { method: 'POST' });
         if (d.team?.live) {
           S.data = d; S.tab = 'members'; window.Paddle?.Checkout?.close?.(); waitingForActivation = false;
           render(); say('Your Team plan is active. Invite your colleagues.'); return;
@@ -329,13 +338,14 @@ select.mini{padding:0 8px}
       await new Promise((r) => setTimeout(r, 2500));
     }
     waitingForActivation = false;
-    say('Checkout is complete. Refresh this page to check activation.');
+    billingNotice('Checkout completed. Paddle is still confirming your subscription. Refresh to check activation.');
     load();
   }
 
   async function startCheckout() {
     if (checkoutPending || waitingForActivation) return;
     const btn = $('#payBtn'); btn.disabled = true;
+    billingNotice('');
     try {
       if (!S.data.team) {
         const name = $('#tName')?.value.trim();
@@ -343,31 +353,34 @@ select.mini{padding:0 8px}
         S.data = await team('', { method: 'POST', body: { name } });
       }
       const c = await team('/checkout', { method: 'POST', body: { cycle: S.cycle, seats: S.seats } });
+      if (!Biz.checkoutAvailable(c) || !validTransaction(c.transactionId)) throw new Error('Paddle checkout is temporarily unavailable.');
       await loadPaddle(c);
       checkoutFromLink = false;
+      activeTransaction = c.transactionId;
       checkoutPending = true;
       window.Paddle.Checkout.open({
         transactionId: c.transactionId,
         customer: { email: c.customer.email },
         settings: checkoutSettings,
       });
-    } catch (e) { checkoutPending = false; say(e.message); }
+    } catch (e) { checkoutPending = false; billingNotice(e.message); }
     finally { if (btn.isConnected && !checkoutPending) btn.disabled = false; }
   }
 
   async function openPaymentLink() {
     if (!paymentLinkId) return;
-    if (!/^txn_[a-z0-9]{26}$/i.test(paymentLinkId)) return say('This Paddle payment link is incomplete.');
+    if (!validTransaction(paymentLinkId)) return billingNotice('This Paddle payment link is incomplete.');
     try {
       const { billing } = await Biz.call('/config', { auth: false });
-      if (!checkoutAvailable({ billing })) return say('Online billing is currently unavailable.');
+      if (!checkoutAvailable({ billing })) return billingNotice('Online billing is currently unavailable. Contact business@livinai.app for help with your payment.');
       checkoutFromLink = true;
+      activeTransaction = paymentLinkId;
       checkoutPending = true;
       // Paddle.js opens the transaction in the _ptxn query parameter on initialization.
       await loadPaddle(billing);
     } catch (error) {
       checkoutPending = false;
-      say(error.message);
+      billingNotice(error.message);
     }
   }
 
@@ -412,7 +425,7 @@ select.mini{padding:0 8px}
       <section class="card panel">
         <div class="row" style="justify-content:space-between"><h2>Team plan ${statusBadge(t)}</h2></div>
         <p class="sub">${t.cycle === 'month' ? 'Billed monthly' : 'Billed yearly'}${t.currentPeriodEnd ? ` · ${t.cancelAt ? 'Access until' : t.status === 'trialing' ? 'First payment on' : 'Renews on'} ${date(t.cancelAt || t.currentPeriodEnd)}` : ''}</p>
-        <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpis plan-kpis">
           <div class="kpi"><b>${d.seatsUsed}/${t.seats}</b><span>Seats used</span></div>
           <div class="kpi"><b>${d.members.filter((m) => m.status === 'active').length}</b><span>Active members</span></div>
           <div class="kpi"><b>${d.credits ? `${d.credits.remaining}/${d.credits.limit}` : '—'}</b><span>Image credits left</span></div>

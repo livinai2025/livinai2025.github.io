@@ -13,6 +13,10 @@
   const money = (cents, currency = TEAM_PLAN.currency) => new Intl.NumberFormat('en-US', {
     style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0,
   }).format(cents / 100);
+  const checkoutAvailable = billing => Boolean(billing?.ready && billing.plan && (
+    (billing.environment === 'production' && billing.clientToken?.startsWith('live_')) ||
+    (local && billing.environment === 'sandbox' && billing.clientToken?.startsWith('test_'))
+  ));
 
   const memory = new Map();
   const store = {
@@ -182,7 +186,7 @@
   function signOut() { store.set('lvb_user', null); store.set('lvb_visitor', null); }
 
   window.Biz = {
-    API, SITE, TEAM_PLAN, money, store, call, fileToDataUrl, urlToDataUrl, renderSignIn, signOut,
+    API, SITE, TEAM_PLAN, money, checkoutAvailable, store, call, fileToDataUrl, urlToDataUrl, renderSignIn, signOut,
     hasSession: () => Boolean(store.get('lvb_user') || store.get('lvb_visitor')),
     me: () => call('/me'),
     session: (d) => call('/session', { method: 'POST', body: d }).then((r) => { store.set('lvb_visitor', r.visitorToken); return r; }),
