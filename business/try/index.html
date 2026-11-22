@@ -58,7 +58,7 @@ small.note{color:var(--faint);font-size:.78rem}
     <p class="err" id="err" hidden></p>
   </main>
   <footer>
-    <small class="note">Your photo is only used to make this picture. Powered by Livinai.</small>
+    <small class="note">Your photo is only used to make this picture.<span id="powered"> Powered by Livinai.</span></small>
     <label class="btn p" id="upBtn" tabindex="0">Upload a room photo<input type="file" accept="image/jpeg,image/png,image/webp" id="file" hidden></label>
   </footer>
 </div>
@@ -73,6 +73,8 @@ small.note{color:var(--faint);font-size:.78rem}
   let cat, cur;
   try { cat = (await Biz.call('/catalogues/' + encodeURIComponent(cid) + '?count=0')).catalogue; }
   catch (e) { err(e.status === 404 ? 'This catalogue could not be found.' : e.message); $('#upBtn').hidden = true; return; }
+  if (/^#[0-9a-f]{6}$/i.test(cat.brandColor || '')) document.documentElement.style.setProperty('--green', cat.brandColor);
+  if (cat.hideBranding) $('#powered').hidden = true;
   if (cat.logoUrl) { const im = new Image(); im.src = cat.logoUrl; im.alt = cat.brand || ''; $('header b').prepend(im); }
   if (!cat.tryonEnabled) { $('#ph').innerHTML = '<div><b>Room previews are coming soon</b>This store has not switched them on yet.</div>'; $('#upBtn').hidden = true; }
   cur = cat.products.find(p => p.id === qs.get('p')) || cat.products[0];

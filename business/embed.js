@@ -1,7 +1,7 @@
 /*!
  * Livinai "See it in your room" button.
  * <script src="https://livinai.app/business/embed.js" data-catalogue="CATALOGUE_ID" async></script>
- * Optional: data-product="PRODUCT_ID", data-label="See it in your room", data-target="#css-selector"
+ * Optional: data-product="PRODUCT_ID", data-label="See it in your room", data-target="#css-selector", data-color="#164a37"
  */
 (function () {
   var script = document.currentScript || document.querySelector('script[src*="business/embed.js"][data-catalogue]');
@@ -12,9 +12,10 @@
   var pid = script.getAttribute('data-product') || '';
   var label = script.getAttribute('data-label') || 'See it in your room';
   var target = script.getAttribute('data-target');
+  var color = /^#[0-9a-f]{6}$/i.test(script.getAttribute('data-color') || '') ? script.getAttribute('data-color') : '#164a37';
 
-  var css = '.lvb-btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;border:0;background:#164a37;color:#fff;font:500 15px/1 Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 20px -10px rgba(14,43,33,.6)}'
-    + '.lvb-btn:hover{background:#1f5d46}.lvb-btn svg{width:18px;height:18px}'
+  var css = '.lvb-btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;border:0;background:' + color + ';color:#fff;font:500 15px/1 Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 20px -10px rgba(14,43,33,.6)}'
+    + '.lvb-btn:hover{filter:brightness(1.12)}.lvb-btn svg{width:18px;height:18px}'
     + '.lvb-ov{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(14,22,18,.55)}'
     + '.lvb-ov iframe{width:min(720px,100%);height:min(720px,calc(100vh - 32px));border:0;border-radius:24px;background:#fff;box-shadow:0 40px 80px -32px rgba(0,0,0,.5)}';
   var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);

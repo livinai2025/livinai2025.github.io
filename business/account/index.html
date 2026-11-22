@@ -113,7 +113,7 @@ select.mini{padding:0 8px}
     <nav class="nav" aria-label="Main">
       <a href="/business/">Overview</a>
       <a href="/business/#catalogue">Catalogue Studio</a>
-      <a href="/business/#pricing">Pricing</a>
+      <a href="/business/tours/">3D tours</a>
       <a href="/business/account/" aria-current="page">Team account</a>
     </nav>
     <div class="hdr-cta">
@@ -124,7 +124,7 @@ select.mini{padding:0 8px}
   <nav class="mnav" id="mnav" aria-label="Mobile">
     <a href="/business/">Overview <svg><use href="#i-chev"/></svg></a>
     <a href="/business/#catalogue">Catalogue Studio <svg><use href="#i-chev"/></svg></a>
-    <a href="/business/#pricing">Pricing <svg><use href="#i-chev"/></svg></a>
+    <a href="/business/tours/">3D tours <svg><use href="#i-chev"/></svg></a>
     <a href="/business/account/" aria-current="page">Team account <svg><use href="#i-chev"/></svg></a>
     <a class="btn btn-secondary" href="/business/#demo">Book a demo</a>
   </nav>
@@ -161,6 +161,9 @@ select.mini{padding:0 8px}
   /* Prices shown before checkout. Paddle shows the final amount, in the buyer's currency, with tax. */
   const PRICE = { month: { team: 99, seat: 25 }, year: { team: 948, seat: 300 } };
   const INCLUDED = 3;
+  const TRIAL = 14;
+  /** A team gets one free trial. */
+  const trialOn = () => !S.data?.team?.trialUsed;
 
   const $ = (s, r = document) => r.querySelector(s);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -207,7 +210,7 @@ select.mini{padding:0 8px}
       <div class="l"><span>Team plan, ${INCLUDED} seats</span><span>${money(p.team)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>
       ${extra ? `<div class="l"><span>${extra} extra seat${extra === 1 ? '' : 's'} × ${money(p.seat)}</span><span>${money(extra * p.seat)}${S.cycle === 'year' ? '/yr' : '/mo'}</span></div>` : ''}
       <div class="l tot"><span>Total</span><span>${per}</span></div>
-      <small>Tax is added at checkout where it applies. Paddle sends your invoices. Cancel any time; you keep access until the end of the period you paid for.</small>`;
+      <small>${trialOn() ? `Free for ${TRIAL} days, then this amount. Cancel before day ${TRIAL + 1} and you pay nothing. ` : ''}Tax is added at checkout where it applies. Paddle sends your invoices. Cancel any time; you keep access until the end of the period you paid for.</small>`;
   }
 
   function buyPanel(d) {
@@ -218,7 +221,7 @@ select.mini{padding:0 8px}
     }
     return `
       <section class="card panel" id="buy">
-        <h2>${d.team ? 'Start your Team plan' : 'Create your team'}</h2>
+        <h2>${d.team ? 'Start your Team plan' : 'Create your team'}${trialOn() ? ` <span class="badge">${TRIAL} days free</span>` : ''}</h2>
         <p class="sub">Everything in Livinai Pro for every seat, plus a shared library, your logo on catalogues and a usage dashboard.</p>
         <div class="buy">
           <div style="display:grid;gap:18px">
@@ -239,7 +242,8 @@ select.mini{padding:0 8px}
               <li>${ICON}Shared product library and catalogues for the whole team</li>
               <li>${ICON}Your logo on catalogues and the "See it in your room" window</li>
               <li>${ICON}Shopper try-ons on your website and catalogues</li>
-              <li>${ICON}Usage dashboard and bulk product upload</li>
+              <li>${ICON}Public 3D tour links for your listings and projects</li>
+              <li>${ICON}Brand colour, white label, usage dashboard and bulk upload</li>
             </ul>
           </div>
           <div class="sum" id="sum">${priceLines()}</div>
@@ -247,7 +251,7 @@ select.mini{padding:0 8px}
         <div class="row" style="margin-top:22px">
           ${billingOff
             ? `<p class="note">Online checkout is being switched on. <a href="/business/#demo">Book a demo</a> and we will start your team with you.</p>`
-            : `<button class="btn btn-primary" id="payBtn" type="button">Continue to secure payment <svg class="arr"><use href="#i-arrow"/></svg></button>
+            : `<button class="btn btn-primary" id="payBtn" type="button">${trialOn() ? `Start ${TRIAL}-day free trial` : 'Continue to secure payment'} <svg class="arr"><use href="#i-arrow"/></svg></button>
                <small class="muted">Card, PayPal, Apple Pay or Google Pay, through Paddle.</small>`}
         </div>
       </section>`;
@@ -326,6 +330,7 @@ select.mini{padding:0 8px}
   function statusBadge(t) {
     if (t.live && t.cancelAt) return `<span class="badge warn">Ends ${date(t.cancelAt)}</span>`;
     if (t.status === 'past_due') return '<span class="badge warn">Payment due</span>';
+    if (t.status === 'trialing') return `<span class="badge">Free trial${t.currentPeriodEnd ? ` until ${date(t.currentPeriodEnd)}` : ''}</span>`;
     if (t.live) return '<span class="badge">Active</span>';
     if (t.status === 'canceled') return '<span class="badge off">Ended</span>';
     if (t.status === 'paused') return '<span class="badge warn">Paused</span>';
@@ -335,12 +340,12 @@ select.mini{padding:0 8px}
   function teamView(d) {
     const t = d.team, role = d.member.role, owner = role === 'owner', admin = owner || role === 'admin';
     $('#title').textContent = t.name;
-    const tabs = [['overview', 'Overview'], ['members', 'Members'], ['brand', 'Brand'], ['usage', 'Usage']];
+    const tabs = [['overview', 'Overview'], ['members', 'Members'], ['brand', 'Brand'], ['usage', 'Usage'], ['tours', '3D tours']];
     if (!tabs.some(([k]) => k === S.tab)) S.tab = 'overview';
     view.innerHTML = `
       <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</div>
       <div id="tabBody"></div>`;
-    view.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { S.tab = b.dataset.tab; history.replaceState(null, '', `?tab=${S.tab}`); teamView(S.data); }));
+    view.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.tab === 'tours') { location.href = '/business/tours/'; return; } S.tab = b.dataset.tab; history.replaceState(null, '', `?tab=${S.tab}`); teamView(S.data); }));
     const body = $('#tabBody');
     if (S.tab === 'overview') overviewTab(body, d, owner);
     if (S.tab === 'members') membersTab(body, d, owner, admin);
@@ -354,7 +359,7 @@ select.mini{padding:0 8px}
     body.innerHTML = `
       <section class="card panel">
         <div class="row" style="justify-content:space-between"><h2>Team plan ${statusBadge(t)}</h2></div>
-        <p class="sub">${t.cycle === 'month' ? 'Billed monthly' : 'Billed yearly'}${t.currentPeriodEnd ? ` · ${t.cancelAt ? 'Access until' : 'Renews on'} ${date(t.cancelAt || t.currentPeriodEnd)}` : ''}</p>
+        <p class="sub">${t.cycle === 'month' ? 'Billed monthly' : 'Billed yearly'}${t.currentPeriodEnd ? ` · ${t.cancelAt ? 'Access until' : t.status === 'trialing' ? 'First payment on' : 'Renews on'} ${date(t.cancelAt || t.currentPeriodEnd)}` : ''}</p>
         <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
           <div class="kpi"><b>${d.seatsUsed}/${t.seats}</b><span>Seats used</span></div>
           <div class="kpi"><b>${d.members.filter((m) => m.status === 'active').length}</b><span>People with Pro</span></div>
@@ -454,6 +459,20 @@ select.mini{padding:0 8px}
         </div>` : '<p class="muted" style="margin-top:12px">Only the owner or an admin can change the logo.</p>'}
       </section>
       <section class="card panel">
+        <h2>Brand colour</h2>
+        <p class="sub">Used for buttons and accents on your catalogues, the "See it in your room" window and your 3D tours.</p>
+        <form class="row" id="colorForm">
+          <input type="color" id="bc" value="${esc(t.brandColor || '#164a37')}" aria-label="Brand colour" style="width:52px;height:46px;padding:2px;border-radius:12px;border:1px solid var(--line-2);background:#fff" ${admin ? '' : 'disabled'}>
+          <input id="bcHex" value="${esc(t.brandColor || '')}" placeholder="#164a37" maxlength="7" aria-label="Colour code" style="width:120px;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line-2)" ${admin ? '' : 'disabled'}>
+          ${admin ? '<button class="btn btn-secondary btn-sm" type="submit">Save colour</button>' + (t.brandColor ? ' <button class="mini" id="bcReset" type="button">Use Livinai green</button>' : '') : ''}
+        </form>
+      </section>
+      <section class="card panel">
+        <h2>White label</h2>
+        <p class="sub">Hide "Made with Livinai" on everything your team shares: catalogues, PDF lookbooks, the try-on window and 3D tours.</p>
+        <label class="row" style="cursor:${admin ? 'pointer' : 'default'}"><input type="checkbox" id="wl" ${t.hideBranding ? 'checked' : ''} ${admin ? '' : 'disabled'} style="width:20px;height:20px;accent-color:var(--green)"> <span>Hide Livinai branding</span></label>
+      </section>
+      <section class="card panel">
         <h2>Team name</h2><p class="sub">Used on catalogues when no brand name is given.</p>
         <form class="inv" id="nameForm"><input id="tn" value="${esc(t.name)}" maxlength="120" aria-label="Team name" ${admin ? '' : 'disabled'}>${admin ? '<button class="btn btn-secondary" type="submit">Save</button>' : ''}</form>
       </section>`;
@@ -464,6 +483,12 @@ select.mini{padding:0 8px}
       catch (err) { say(err.message); }
     });
     $('#logoDel')?.addEventListener('click', async () => { try { S.data = await team('/logo', { method: 'DELETE' }); brandTab(body, S.data, admin); say('Logo removed.'); } catch (err) { say(err.message); } });
+    const saveBrand = async (change, msg) => { try { S.data = await team('/brand', { method: 'PATCH', body: change }); brandTab(body, S.data, admin); say(msg); } catch (err) { say(err.message); } };
+    $('#bc')?.addEventListener('input', (e) => { $('#bcHex').value = e.target.value; });
+    $('#bcHex')?.addEventListener('input', (e) => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('#bc').value = e.target.value; });
+    $('#colorForm')?.addEventListener('submit', (e) => { e.preventDefault(); const v = $('#bcHex').value.trim() || $('#bc').value; if (!/^#[0-9a-f]{6}$/i.test(v)) { say('Use a colour like #164a37.'); return; } saveBrand({ brandColor: v.toLowerCase() }, 'Colour saved.'); });
+    $('#bcReset')?.addEventListener('click', () => saveBrand({ brandColor: '' }, 'Back to Livinai green.'));
+    $('#wl')?.addEventListener('change', (e) => saveBrand({ hideBranding: e.target.checked }, e.target.checked ? 'Livinai branding hidden.' : 'Livinai branding shown.'));
     $('#nameForm')?.addEventListener('submit', async (e) => { e.preventDefault(); try { S.data = await team('', { method: 'PATCH', body: { name: $('#tn').value } }); $('#title').textContent = S.data.team.name; say('Saved.'); } catch (err) { say(err.message); } });
   }
 
