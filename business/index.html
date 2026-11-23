@@ -999,9 +999,9 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <div class="media rv">
       <div class="frame">
         <div class="ba" id="roomBa">
-          <img class="after" src="img/room-with-sora.webp" alt="The same living room with a bouclé chair by the window" width="1080" height="564" loading="lazy">
-          <img class="before" src="img/us-before.webp" alt="An empty living room with a bay window" width="1080" height="564" loading="lazy">
-          <span class="lbl l">Room photo</span><span class="lbl r">Example with Sora chair</span>
+          <img class="after" src="img/room-with-arlo.webp" alt="The same furnished living room with a cognac leather lounge chair by the window" width="1136" height="592" loading="lazy">
+          <img class="before" src="img/room-furnished.webp" alt="A furnished living room with a bay window" width="1136" height="592" loading="lazy">
+          <span class="lbl l">Room photo</span><span class="lbl r">Example with Arlo chair</span>
           <div class="line"><div class="knob"><svg><use href="#i-lr"/></svg></div></div>
           <input type="range" min="0" max="100" value="50" aria-label="Drag to compare the room before and after">
           <div class="loading" id="roomLoad" hidden><div><span class="spin"></span><b>Placing it in your room</b><p>This usually takes about a minute.</p></div></div>
@@ -1338,6 +1338,10 @@ a.chip-float{text-decoration:none;color:var(--ink)}
   $$('#mnav a').forEach(link => link.addEventListener('click', () => mobileMenu(false)));
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !mnav.inert) { mobileMenu(false); menuBtn.focus(); }
+  });
+  // A tap anywhere outside the menu (and its button) closes it.
+  document.addEventListener('pointerdown', event => {
+    if (!mnav.inert && !mnav.contains(event.target) && !menuBtn.contains(event.target)) mobileMenu(false);
   });
 
   const nav = $('#nav'), navInd = $('.ind', nav), navLinks = $$('a', nav);
@@ -1914,7 +1918,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     roomIn.value = '';
     if (file) makeRoomPreview(() => Biz.fileToDataUrl(file, { maxSide: 1600 }));
   });
-  roomDemo.addEventListener('click', () => makeRoomPreview(() => Biz.urlToDataUrl('img/us-before.webp')));
+  roomDemo.addEventListener('click', () => makeRoomPreview(() => Biz.urlToDataUrl('img/room-furnished.webp')));
 
   async function makeRoomPreview(getRoomImage) {
     if (S.busy) return;

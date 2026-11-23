@@ -21,6 +21,10 @@
     btn.addEventListener('click', () => set(!menu.classList.contains('open')));
     menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('open')) { set(false); btn.focus(); } });
+    // A tap anywhere outside the menu (and its button) closes it.
+    document.addEventListener('pointerdown', (e) => {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) set(false);
+    });
   }
 
   // Before / after sliders
