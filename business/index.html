@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/sweden-after.webp">
+<link rel="preload" as="image" href="img/arches-after.webp">
 <style>
 /* ───────────── tokens ───────────── */
 :root{
@@ -805,14 +805,15 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     <div class="stage-wrap rv d2">
       <div class="stage">
         <div class="ba" id="heroBa">
-          <img class="after" src="img/sweden-after.webp" alt="The same room styled with Livinai: bouclé sectional, travertine table, warm lighting" width="1080" height="564" fetchpriority="high">
-          <img class="before" src="img/sweden-before.webp" alt="Empty living room before styling" width="1080" height="564">
+          <img class="after" src="img/arches-after.webp" alt="The same hall styled with Livinai: curved cream sofa, olive velvet chair, marble table" width="1600" height="900" fetchpriority="high">
+          <img class="before" src="img/arches-before.webp" alt="Empty arched hall before styling" width="1600" height="900">
           <span class="lbl l">Before</span><span class="lbl r">After · Livinai</span>
           <div class="line"><div class="knob"><svg><use href="#i-lr"/></svg></div></div>
           <span class="hint" aria-hidden="true">Drag to compare</span>
           <input type="range" min="0" max="100" value="50" aria-label="Drag to compare before and after">
           <div class="switch" role="group" aria-label="Choose an example">
-            <button aria-pressed="true" data-set="sweden">Apartment</button>
+            <button aria-pressed="true" data-set="arches">Villa</button>
+            <button aria-pressed="false" data-set="sweden">Apartment</button>
             <button aria-pressed="false" data-set="us">Family home</button>
             <button aria-pressed="false" data-set="dubai">Loft</button>
           </div>
@@ -1381,6 +1382,7 @@ a.chip-float{text-decoration:none;color:var(--ink)}
     setTimeout(() => requestAnimationFrame(run), 1100);
   }
   const SETS = {
+    arches: ['Empty arched hall', 'Styled with a curved cream sofa, olive velvet chair and marble table'],
     sweden: ['Empty Stockholm living room', 'Styled with a bouclé sectional and travertine table'],
     us: ['Empty US family living room', 'Styled with a curved sofa and warm neutrals'],
     dubai: ['Empty Dubai loft', 'Styled as a warm lounge with a curved sofa']
@@ -1403,13 +1405,13 @@ a.chip-float{text-decoration:none;color:var(--ink)}
       stat: '2 images', statTxt: 'Try your own photos before choosing a plan.', img: 'scene-sample-armchair.webp', alt: 'Bouclé lounge chair in a bright Japandi room', link: ['#catalogue', 'Try Catalogue Studio'] },
     { k: 'designers', icon: 'i-pen', tab: 'Interior studios', pill: 'For interior designers', title: 'Show clients several directions early.',
       list: ['Compare styles in a client’s own room', 'Preview new wall colours, flooring and finishes', 'Discuss the layout in a 3D walkthrough'],
-      stat: '14', statTxt: 'Design styles, from Japandi to Mediterranean.', img: 'scene-living.webp', alt: 'Minimal living room with beams and bouclé sofa' },
+      stat: '14', statTxt: 'Design styles, from Japandi to Mediterranean.', img: 'living-fireplace.webp', alt: 'Living room with a curved terracotta sofa and travertine fireplace' },
     { k: 'developers', icon: 'i-building', tab: 'Developers', pill: 'For property developers', title: 'Furnished walkthroughs for every unit type.',
       list: ['Turn a floor plan into a furnished 3D home', 'Share tours that buyers can open in a browser', 'Embed a tour on a listing or project page'],
       stat: '3D', statTxt: 'Give buyers a way to explore the layout.', img: 'plan-to-3d.webp', alt: 'Floor plan alongside its furnished 3D walkthrough', link: ['#walkthrough', 'See 3D walkthroughs'] },
     { k: 'rentals', icon: 'i-key', tab: 'Rental managers', pill: 'For short-term rental managers', title: 'One look across every unit.',
       list: ['Preview furnishings before buying', 'Try a consistent style across your units', 'Prepare visuals for listing photos and owner reviews'],
-      stat: '14 styles', statTxt: 'Compare directions before choosing one.', img: 'scene-bedroom.webp', alt: 'Calm styled bedroom' },
+      stat: '14 styles', statTxt: 'Compare directions before choosing one.', img: 'bedroom-walnut.webp', alt: 'Warm bedroom with a walnut bed and plum velvet headboard' },
     { k: 'photo', icon: 'i-camera', tab: 'Photographers', pill: 'For property photographers', title: 'Deliver staged photos the same day.',
       list: ['Stage the photos you just shot', 'Offer virtual staging as a paid extra', 'Review and export the final images yourself'],
       stat: 'On demand', statTxt: 'Create staging previews during your editing workflow.', img: 'sweden-after.webp', alt: 'Styled Stockholm living room' }
