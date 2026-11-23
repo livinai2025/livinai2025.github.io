@@ -14,9 +14,11 @@
   const money = (cents, currency = TEAM_PLAN.currency) => new Intl.NumberFormat('en-US', {
     style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0,
   }).format(cents / 100);
-  // Live checkout on the real site; Creem test mode only when running locally.
+  // Live checkout on the real site. Creem test mode shows only locally or with
+  // ?creemtest=1; the server still refuses test checkouts for unlisted accounts.
+  const testing = local || qs.get('creemtest') === '1';
   const checkoutAvailable = billing => Boolean(billing?.ready && billing.plan && billing.provider === 'creem' && (
-    billing.environment === 'live' || (local && billing.environment === 'test')
+    billing.environment === 'live' || (testing && billing.environment === 'test')
   ));
 
   const memory = new Map();
