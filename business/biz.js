@@ -108,25 +108,14 @@
     el.innerHTML = `<div class="biz-signin">
       <div data-google></div>
       <p class="biz-signin-status" data-status role="status"></p>
-      <details data-password>
-        <summary>Sign in with email and password</summary>
-        <form>
-          <label>Email<input name="email" type="email" autocomplete="username" required></label>
-          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
-          <button type="submit" class="btn btn-primary btn-sm">Sign in</button>
-        </form>
-      </details>
     </div>`;
     const googleMount = el.querySelector('[data-google]');
     const status = el.querySelector('[data-status]');
-    const password = el.querySelector('[data-password]');
-    const form = el.querySelector('form');
-    const submit = form.querySelector('button');
     let pending = false;
 
     async function authenticate(path, body) {
       if (pending || !el.isConnected) return;
-      pending = submit.disabled = true;
+      pending = true;
       status.textContent = 'Signing in…';
       try {
         const auth = await call(path, { method: 'POST', base: '/api/auth', body, auth: false });
@@ -147,23 +136,15 @@
         status.textContent = '';
         await onDone?.(acct);
       } catch (error) {
-        status.textContent = error.status === 401 && path === '/login'
-          ? 'That email and password did not match a Livinai account.'
-          : error.message;
+        status.textContent = error.message;
       } finally {
-        pending = submit.disabled = false;
-        form.elements.password.value = '';
+        pending = false;
       }
     }
 
-    form.addEventListener('submit', event => {
-      event.preventDefault();
-      authenticate('/login', { email: form.elements.email.value.trim(), password: form.elements.password.value });
-    });
     function googleUnavailable() {
       if (!el.isConnected || pending) return;
-      status.textContent = 'Google sign-in is unavailable here. If your Livinai account has a password, you can use it below.';
-      password.open = true;
+      status.textContent = 'Google sign-in could not load. Refresh the page, or try another browser.';
     }
     try {
       await loadGoogle();
